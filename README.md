@@ -1,6 +1,6 @@
 # Portal
 
-Add blood and gore to your games
+A library module for spawning creatures, teleporting tokens, and picking locations. Check the wiki for the scripting API.
 
 ## Before opening an issue read [THIS](https://github.com/theripper93/Levels/blob/v9/ISSUES.md)
 
