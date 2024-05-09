@@ -40,6 +40,26 @@ export class TemplatePreview {
         circle.beginFill(fill, 0.25);
         circle.drawCircle(0, 0, (this.document.distance * canvas.dimensions.distancePixels) / 2);
         circle.endFill();
+
+        if (this.document.texture) {
+            const texture = await loadTexture(this.document.texture);
+            if(texture) {
+                const textureWidth = texture.width;
+                const textureHeight = texture.height;
+                const circleWidthHeight = (this.document.distance * canvas.dimensions.distancePixels);
+
+                const matrix = new PIXI.Matrix();
+                matrix.translate(-textureWidth/2, -textureHeight/2);
+                matrix.scale(circleWidthHeight / textureWidth, circleWidthHeight / textureHeight);
+
+
+                circle.beginTextureFill({texture, matrix});
+                circle.drawCircle(0, 0, this.document.distance * canvas.dimensions.distancePixels / 2);
+                circle.endFill();
+            }
+        }
+
+
         circle.lineStyle(1, stroke, 1);
         circle.drawCircle(0, 0, (this.document.distance * canvas.dimensions.distancePixels) / 2);
         previewObject.addChild(circle);
@@ -54,7 +74,7 @@ export class TemplatePreview {
                     attribute: "alpha",
                     from: 0,
                     to: 1,
-                },
+                }
             ],
             {
                 duration: 200,

@@ -132,7 +132,9 @@ export class Portal {
     }
 
     async #processAsyncCreature(creature) {
+        const originalCreature = creature;
         if (typeof creature === "string") creature = await fromUuid(creature);
+        if (!creature) creature = game.actors.getName(originalCreature);
         if (!creature) return null;
         if (creature instanceof Actor) return await creature.getTokenDocument();
         if (creature instanceof TokenDocument) return creature.toObject();
@@ -159,7 +161,7 @@ export class Portal {
         await this.#preValidateAndProcessData();
 
         const templateDocument = new MeasuredTemplateDocument();
-        templateDocument.updateSource({distance: this.#data.distance, fillColor: this.#data.color});
+        templateDocument.updateSource({distance: this.#data.distance, fillColor: this.#data.color, texture: this.#data.texture});
 
         const templatePreview = new TemplatePreview(templateDocument);
         const result = await templatePreview.drawPreview();
@@ -198,6 +200,11 @@ export class Portal {
     }
 }
 
-//test
 
-//new Portal().addCreature("Actor.r9HUbVw4rv3Y0VMl").spawn();
+//example
+
+new Portal()
+    .addCreature("Aboleth", {count: 3})
+    .color("#ff0000")
+    .texture("icons/svg/dice-target.svg")
+    .spawn();

@@ -37,7 +37,7 @@ export class Propagator {
     //check if a position is free
     static isFree(position) {
       for (let token of canvas.tokens.placeables) {
-        const hitBox = new PIXI.Rectangle(token.x, token.y, token.w, token.h);
+        const hitBox = new PIXI.Rectangle(token.document.x, token.document.y, token.document.width * canvas.scene.dimensions.size, token.document.height * canvas.scene.dimensions.size);
         if (hitBox.contains(position.x, position.y)) {
           return false;
         }
@@ -48,8 +48,8 @@ export class Propagator {
     static canFit(tokenData, position, origin, collision) {
       for (let i = 0; i < tokenData.width; i++) {
         for (let j = 0; j < tokenData.height; j++) {
-          const x = position.x + j;
-          const y = position.y + i;
+          const x = position.x + j * canvas.scene.dimensions.size;
+          const y = position.y + i * canvas.scene.dimensions.size;
           if (!Propagator.isFree({ x, y })) {
             return false;
           }
