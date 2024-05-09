@@ -1,6 +1,6 @@
 {
   "title": "Portal",
-  "description": "desc",
+  "description": "A library module for spawning creatures, teleporting tokens, and picking locations. Check the wiki for the scripting API.",
   "id": "portal-lib",
   "version": "1.0",
   "authors": [
@@ -60,11 +60,6 @@
   "download": "",
   "relationships": {
     "requires": [
-      {
-        "id": "lib-wrapper",
-        "type": "module",
-        "compatibility": {}
-      }
     ]
   },
   "compatibility": {
