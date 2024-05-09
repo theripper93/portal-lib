@@ -1,7 +1,7 @@
 {
-  "title": "module-name",
+  "title": "Portal",
   "description": "desc",
-  "id": "module-id",
+  "id": "portal-lib",
   "version": "1.0",
   "authors": [
     {
@@ -55,8 +55,8 @@
     "styles/module.css"
   ],
   "packs": [],
-  "url": "https://github.com/theripper93/module-id",
-  "manifest": "https://github.com/theripper93/module-id/releases/latest/download/module.json",
+  "url": "https://github.com/theripper93/portal-lib",
+  "manifest": "https://github.com/theripper93/portal-lib/releases/latest/download/module.json",
   "download": "",
   "relationships": {
     "requires": [
