@@ -58,6 +58,7 @@
   "url": "https://github.com/theripper93/portal-lib",
   "manifest": "https://github.com/theripper93/portal-lib/releases/latest/download/module.json",
   "download": "",
+  "library": true,
   "relationships": {
     "requires": [
     ]
