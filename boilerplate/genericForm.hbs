@@ -1,0 +1,70 @@
+<form action="submit">
+    {{#each inputs as |input|}}
+    {{#if (eq input.type 'custom')}}
+    {{{input.html}}}
+    {{else}}
+    <div class="form-group">
+        
+        <label for="{{input.name}}">{{{input.label}}}</label>
+        
+        {{#if (eq input.type 'text')}}
+            <input type="text" name="{{input.name}}" placeholder="{{input.placeholder}}" value="{{input.value}}">
+        {{/if}}
+
+        {{#if (eq input.type 'textarea')}}
+            <textarea type="text" name="{{input.name}}" placeholder="{{input.placeholder}}">{{input.value}}</textarea>
+        {{/if}}
+
+        {{#if (eq input.type 'number')}}
+            <input type="number" min="{{input.min}}" max="{{input.max}}" step="{{input.step}}" name="{{input.name}}" placeholder="{{input.placeholder}}" value="{{input.value}}">
+        {{/if}}
+
+        {{#if (eq input.type 'checkbox')}}
+            <input type="checkbox" name="{{input.name}}" {{#if input.value}}checked{{/if}}>
+        {{/if}}
+
+        {{#if (eq input.type 'select')}}
+            <select name="{{input.name}}">
+            {{#each input.options as |option|}}
+                {{#if option.optgroup}}
+                    {{#if option.optgroup.start}}
+                        <optgroup label="{{option.optgroup.label}}">
+                    {{else}}
+                        </optgroup>
+                    {{/if}}
+                {{else}}
+                <option value="{{@key}}" {{#if (eq @key input.value)}}selected{{/if}}>{{option}}</option>
+                {{/if}}
+            {{/each}}
+            </select>
+        {{/if}}
+
+        {{#if (eq input.type 'range')}}
+            <div class="form-fields">
+                <input type="range" min="{{input.min}}" max="{{input.max}}" step="{{input.step}}" name="{{input.name}}" value="{{input.value}}">
+                <span class="range-value">{{input.value}}</span>
+            </div>
+        {{/if}}
+
+        {{#if (eq input.type 'color')}}
+            <div class="form-fields">
+                {{colorPicker name=input.name value=input.value default="#000000"}}
+            </div>
+        {{/if}}
+
+        {{#if (eq input.type 'filepicker')}}
+                <div class="form-fields">     
+                    <button type="button" class="file-picker" data-extras="{{input.fpTypes}}" data-type="{{input.fpType}}" data-target="{{input.name}}" title="Browse Files" tabindex="-1">
+                        <i class="fas fa-file-import fa-fw"></i>
+                    </button>
+                    <input class="image" type="text" name="{{input.name}}" placeholder="{{input.placeholder}}" value="{{input.value}}">
+                </div>
+        {{/if}}
+
+        {{#if input.notes}}
+        <p class="notes">{{input.notes}}</p>
+        {{/if}}
+    </div>
+    {{/if}}
+    {{/each}}
+</form>
