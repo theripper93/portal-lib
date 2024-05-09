@@ -66,12 +66,21 @@ export class Portal {
         return this;
     }
 
-    origin(origin = { x: 0, y: 0, elevation: 0 }) {
+    origin(origin) {
+
+        if(origin instanceof Token || origin instanceof TokenDocument) {
+            this.#data.teleportTarget = origin.document ?? origin;
+        }
+
+        if (!origin || !Number.isFinite(origin.x) || !Number.isFinite(origin.y)) {
+            ui.notifications.error(`${MODULE_ID}.ERR.InvalidOrigin`);
+            return this;
+        }
         if (origin.center) {
             this.#data.origin = {
                 x: origin.center.x,
                 y: origin.center.y,
-                elevation: origin.elevation,
+                elevation: origin.document.elevation,
             };
         } else {
             this.#data.origin = {
@@ -163,10 +172,19 @@ export class Portal {
         const templateDocument = new MeasuredTemplateDocument();
         templateDocument.updateSource({distance: this.#data.distance, fillColor: this.#data.color, texture: this.#data.texture});
 
-        const templatePreview = new TemplatePreview(templateDocument);
+        const templatePreview = new TemplatePreview(templateDocument, {origin: this.#data.origin, range: this.#data.range});
         const result = await templatePreview.drawPreview();
 
-        if (result) this.#template = result;
+        if (result) {
+            if (this.#data.origin && this.#data.range) {
+                const distance = canvas.grid.measureDistance(this.#data.origin, {x: result.x, y: result.y});
+                if (distance > this.#data.range) {
+                    ui.notifications.error(`${MODULE_ID}.ERR.OutOfRange`);
+                    return this.pick(options);
+                }
+            }
+            this.#template = result;
+        }
         else return false;
 
         const x = this.#template.x;
@@ -198,13 +216,68 @@ export class Portal {
 
         return this;
     }
+
+    async teleport(options = {}) {
+        const targetToken = this.#data.teleportTarget;
+        if (!targetToken) {
+            ui.notifications.error(`${MODULE_ID}.ERR.NoTeleportTarget`);
+            return false;
+        }
+        await this.#preValidateAndProcessData();
+        let position;
+        if (!this.#template) {
+            const picked = await this.pick(options);
+            if (!picked) return false;
+            position = picked;
+        }
+        //fade out token
+        const placeable = targetToken.object;
+        const originalAlpha = placeable.mesh.alpha;
+        await CanvasAnimation.animate(
+            [
+                {
+                    parent: placeable.mesh,
+                    attribute: "alpha",
+                    to: 0,
+                },
+            ],
+            {
+                duration: 300,
+                easing: "easeOutCircle",
+            },
+        );
+
+
+        await targetToken.update({x: position.x, y: position.y, elevation: position.elevation}, {animate: false});
+
+        //fade in token
+        await CanvasAnimation.animate(
+            [
+                {
+                    parent: placeable.mesh,
+                    attribute: "alpha",
+                    from: 0,
+                    to: originalAlpha,
+                },
+            ],
+            {
+                duration: 300,
+                easing: "easeInCircle",
+            },
+        );
+        return this;
+    }
 }
 
 
 //example
-
+/*
 new Portal()
     .addCreature("Aboleth", {count: 3})
     .color("#ff0000")
     .texture("icons/svg/dice-target.svg")
+    .origin(token)
+    .range(60)
     .spawn();
+
+    */

@@ -1,8 +1,11 @@
 export class TemplatePreview {
-    constructor(template) {
+    constructor(template, {origin, range}) {
         this.document = template;
         this.resolve = null;
         this.promise = new Promise((resolve) => (this.resolve = resolve));
+        this.origin = origin;
+        this.range = range;
+        if (this.range) this.range = range * canvas.scene.dimensions.distancePixels;
     }
 
     activateListeners() {
@@ -82,18 +85,53 @@ export class TemplatePreview {
             },
         );
         this.activateListeners();
+        this.drawRangePreview();
         return this.promise;
+    }
+
+    async drawRangePreview() {
+        if(!this.range || !this.origin) return;
+        const previewObject = new PIXI.Container();
+        previewObject.alpha = 0;
+        //draw a circle with border
+        const circle = new PIXI.Graphics();
+        const fill = this.document.fillColor;
+        const stroke = this.document.borderColor;
+        circle.beginFill(fill, 0.15);
+        circle.drawCircle(0, 0, this.range);
+        circle.endFill();
+
+        circle.lineStyle(1, stroke, 1);
+        circle.drawCircle(0, 0, this.range);
+        previewObject.addChild(circle);
+        this.previewRangeObject = previewObject;
+        canvas.interface.grid.addChild(previewObject);
+        CanvasAnimation.animate(
+            [
+                {
+                    parent: previewObject,
+                    attribute: "alpha",
+                    from: 0,
+                    to: 1,
+                }
+            ],
+            {
+                duration: 200,
+                easing: "easeInCircle",
+            },
+        );
+        previewObject.x = this.origin.x;
+        previewObject.y = this.origin.y;
     }
 
     async cleanup() {
         document.removeEventListener("mousemove", this._onMoveFn);
         document.removeEventListener("mouseup", this._onMouseUpFn);
-        await CanvasAnimation.animate(
+        CanvasAnimation.animate(
             [
                 {
                     parent: this.previewObject,
                     attribute: "alpha",
-                    from: 1,
                     to: 0,
                 },
             ],
@@ -101,8 +139,28 @@ export class TemplatePreview {
                 duration: 200,
                 easing: "easeOutCircle",
             },
-        );
-        this.previewObject.removeFromParent();
-        this.previewObject.destroy(true);
+        ).then(() => {
+            this.previewObject.removeFromParent();
+            this.previewObject.destroy(true);
+        });
+
+        if (this.previewRangeObject) {
+            CanvasAnimation.animate(
+                [
+                    {
+                        parent: this.previewRangeObject,
+                        attribute: "alpha",
+                        to: 0,
+                    },
+                ],
+                {
+                    duration: 200,
+                    easing: "easeOutCircle",
+                },
+            ).then(() => {
+                this.previewRangeObject.removeFromParent();
+                this.previewRangeObject.destroy(true);
+            });
+        }
     }
 }
