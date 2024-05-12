@@ -193,10 +193,22 @@ export class Portal {
         await this.#preValidateAndProcessData();
 
         const templateDocument = new MeasuredTemplateDocument();
-        templateDocument.updateSource({ distance: this.#data.distance, fillColor: this.#data.color, texture: this.#data.texture });
+        templateDocument.updateSource({distance: this.#data.distance, fillColor: this.#data.color, texture: this.#data.texture});
+        
+        let result;
 
-        const templatePreview = new TemplatePreview(templateDocument, { origin: this.#data.origin, range: this.#data.range });
-        const result = await templatePreview.drawPreview();
+        if (game.Levels3DPreview?._active) {
+            templateDocument.updateSource({distance: this.#data.distance / 2});
+            const template3d = await game.Levels3DPreview.CONFIG.entityClass.Template3D.drawPreview({document: templateDocument}, false);
+            const centerCoords = canvas.grid.getCenter(template3d.x, template3d.y);
+            template3d.x = centerCoords[0];
+            template3d.y = centerCoords[1];
+            result = template3d;
+        } else {
+            const templatePreview = new TemplatePreview(templateDocument, { origin: this.#data.origin, range: this.#data.range });
+            result = await templatePreview.drawPreview();
+        }
+
 
         if (result) {
             if (this.#data.origin && this.#data.range) {
