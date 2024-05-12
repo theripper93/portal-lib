@@ -223,6 +223,8 @@ export class Portal {
             const picked = await this.pick(options);
             if (!picked) return false;
             position = picked;
+        } else {
+            position = {x : this.#template.x, y : this.#template.y, elevation : this.#template.elevation};
         }
 
         const spawned = [];
@@ -230,16 +232,17 @@ export class Portal {
         for (let ti = 0; ti < this.#tokens.length; ti++) {
             const count = this.#counts[ti];
             const tokenDocument = this.#tokens[ti];
+            const offsetPosition = {x: position.x - (tokenDocument.width / 2) * canvas.scene.dimensions.size, y: position.y - (tokenDocument.height / 2) * canvas.scene.dimensions.size, elevation: position.elevation};
             for (let i = 0; i < count; i++) {
-                const tPos = Propagator.getFreePosition(tokenDocument, position, true);
-                tokenDocument.updateSource({ x: tPos.x, y: tPos.y, elevation: position.elevation });
-                const token = await canvas.scene.createEmbeddedDocuments("Token", [tokenDocument])[0];
+                const tPos = Propagator.getFreePosition(tokenDocument, offsetPosition, true);
+                tokenDocument.updateSource({ x: tPos.x, y: tPos.y, elevation: offsetPosition.elevation });
+                const token = (await canvas.scene.createEmbeddedDocuments("Token", [tokenDocument]))[0];
                 await this.#processPostSpawnUpdate(token, this.#updateData[ti]);
                 spawned.push(token);
             }
         }
 
-        return this;
+        return spawned;
     }
 
     async teleport(options = {}) {

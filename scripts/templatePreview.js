@@ -5,6 +5,7 @@ export class TemplatePreview {
         this.promise = new Promise((resolve) => (this.resolve = resolve));
         this.origin = origin;
         this.range = range;
+        this.isEvenDistance = (this.document.distance / canvas.scene.dimensions.distance) % 2 === 0;
         if (this.range) this.range = range * canvas.scene.dimensions.distancePixels;
     }
 
@@ -18,9 +19,16 @@ export class TemplatePreview {
     #onMove(event) {
         let coords = canvas.canvasCoordinatesFromClient({ x: event.clientX, y: event.clientY });
         coords = [coords.x, coords.y];
-        coords = canvas.grid.getCenter(coords[0], coords[1]);
-        coords = canvas.grid.getTopLeft(coords[0], coords[1]);
-        this.document.updateSource({ x: coords[0], y: coords[1] });
+        //coords = canvas.grid.getCenter(coords[0], coords[1]);
+        //coords = canvas.grid.getTopLeft(coords[0], coords[1]);
+        //if distance is not even, snap to center
+        if (!this.isEvenDistance) {
+            coords = canvas.grid.getCenter(coords[0], coords[1]);
+        } else {
+            const snapped = canvas.grid.getSnappedPosition(coords[0], coords[1]);
+            coords = [snapped.x, snapped.y];
+        }
+        this.document.updateSource({x: coords[0], y: coords[1]});
         this.previewObject.x = coords[0];
         this.previewObject.y = coords[1];
     }
@@ -66,8 +74,8 @@ export class TemplatePreview {
         circle.lineStyle(1, stroke, 1);
         circle.drawCircle(0, 0, (this.document.distance * canvas.dimensions.distancePixels) / 2);
         previewObject.addChild(circle);
-        circle.x += circle.width / 2;
-        circle.y += circle.height / 2;
+        //circle.x += circle.width / 2;
+        //circle.y += circle.height / 2;
         this.previewObject = previewObject;
         canvas.interface.grid.addChild(previewObject);
         CanvasAnimation.animate(
