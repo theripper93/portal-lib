@@ -1,4 +1,4 @@
-import {Propagator} from "./lib/propagator.js";
+import { Propagator } from "./lib/propagator.js";
 import { MODULE_ID } from "./main.js";
 import { TemplatePreview } from "./templatePreview.js";
 
@@ -45,7 +45,7 @@ export class Portal {
         return this.#data.texture;
     }
 
-    addCreature(creature, {updateData = null, count = 1} = {}) {
+    addCreature(creature, { updateData = null, count = 1 } = {}) {
         if (Array.isArray(creature)) {
             creature.forEach((c) => this.addCreature(c));
             return this;
@@ -67,8 +67,7 @@ export class Portal {
     }
 
     origin(origin) {
-
-        if(origin instanceof Token || origin instanceof TokenDocument) {
+        if (origin instanceof Token || origin instanceof TokenDocument) {
             this.#data.teleportTarget = origin.document ?? origin;
         }
 
@@ -134,7 +133,7 @@ export class Portal {
 
         for (let i = 0; i < this.#tokens.length; i++) {
             const token = this.#tokens[i];
-            if (this.#updateData[i]) token.updateSource(this.#updateData[i]);
+            if (this.#updateData[i]?.token) token.updateSource(this.#updateData[i].token);
         }
 
         return this;
@@ -164,28 +163,51 @@ export class Portal {
         return this;
     }
 
+    async #processPostSpawnUpdate(tokenDocument, updateData) {
+        if (!updateData) return;
+        const actor = tokenDocument.actor;
+        if (!actor) return;
+        if (updateData.actor) await tokenDocument.actor.update(updateData.actor);
+        if (updateData.embedded) {
+            for (const [key, value] of Object.entries(updateData.embedded)) {
+                const collection = actor.getEmbeddedCollection(key);
+                //prepare updates
+                const updates = [];
+                collection.forEach((entry) => {
+                    const entityUpdateData = value[entry.id] ?? value[entry.name];
+                    if (entityUpdateData) {
+                        updates.push({
+                            _id: entry.id,
+                            ...entityUpdateData,
+                        });
+                    }
+                });
+                await collection.update(updates);
+            }
+        }
+    }
+
     //final methods
 
     async pick(options = {}) {
         await this.#preValidateAndProcessData();
 
         const templateDocument = new MeasuredTemplateDocument();
-        templateDocument.updateSource({distance: this.#data.distance, fillColor: this.#data.color, texture: this.#data.texture});
+        templateDocument.updateSource({ distance: this.#data.distance, fillColor: this.#data.color, texture: this.#data.texture });
 
-        const templatePreview = new TemplatePreview(templateDocument, {origin: this.#data.origin, range: this.#data.range});
+        const templatePreview = new TemplatePreview(templateDocument, { origin: this.#data.origin, range: this.#data.range });
         const result = await templatePreview.drawPreview();
 
         if (result) {
             if (this.#data.origin && this.#data.range) {
-                const distance = canvas.grid.measureDistance(this.#data.origin, {x: result.x, y: result.y});
+                const distance = canvas.grid.measureDistance(this.#data.origin, { x: result.x, y: result.y });
                 if (distance > this.#data.range) {
                     ui.notifications.error(`${MODULE_ID}.ERR.OutOfRange`);
                     return this.pick(options);
                 }
             }
             this.#template = result;
-        }
-        else return false;
+        } else return false;
 
         const x = this.#template.x;
         const y = this.#template.y;
@@ -203,16 +225,19 @@ export class Portal {
             position = picked;
         }
 
+        const spawned = [];
+
         for (let ti = 0; ti < this.#tokens.length; ti++) {
             const count = this.#counts[ti];
             const tokenDocument = this.#tokens[ti];
             for (let i = 0; i < count; i++) {
                 const tPos = Propagator.getFreePosition(tokenDocument, position, true);
-                tokenDocument.updateSource({x: tPos.x, y: tPos.y, elevation: position.elevation});
-                await canvas.scene.createEmbeddedDocuments("Token", [tokenDocument]);
+                tokenDocument.updateSource({ x: tPos.x, y: tPos.y, elevation: position.elevation });
+                const token = await canvas.scene.createEmbeddedDocuments("Token", [tokenDocument])[0];
+                await this.#processPostSpawnUpdate(token, this.#updateData[ti]);
+                spawned.push(token);
             }
         }
-
 
         return this;
     }
@@ -247,8 +272,7 @@ export class Portal {
             },
         );
 
-
-        await targetToken.update({x: position.x, y: position.y, elevation: position.elevation}, {animate: false});
+        await targetToken.update({ x: position.x, y: position.y, elevation: position.elevation }, { animate: false });
 
         //fade in token
         await CanvasAnimation.animate(
@@ -268,7 +292,6 @@ export class Portal {
         return this;
     }
 }
-
 
 //example
 /*
