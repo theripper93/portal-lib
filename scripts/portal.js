@@ -156,7 +156,7 @@ export class Portal {
         await this.#resolveTokenData();
         if (!Number.isFinite(this.#data.distance)) {
             const firstToken = this.#tokens[0];
-            const size = Math.max(firstToken.width, firstToken.height);
+            const size = firstToken ? Math.max(firstToken.width, firstToken.height) : 1;
             this.#data.distance = size * canvas.scene.dimensions.distance;
         }
         if (typeof this.#data.color !== "string") this.#data.color = game.user.color.toString();
@@ -225,7 +225,7 @@ export class Portal {
 
         const x = this.#template.x;
         const y = this.#template.y;
-        const elevation = this.origin.elevation ?? this.#template.elevation;
+        const elevation = this.origin.elevation ?? this.#template.elevation ?? 0;
 
         return { x, y, elevation };
     }
@@ -239,7 +239,7 @@ export class Portal {
             if (!picked) return false;
             position = picked;
         } else {
-            position = {x : this.#template.x, y : this.#template.y, elevation : this.#template.elevation};
+            position = {x : this.#template.x, y : this.#template.y, elevation : this.#template.elevation ?? 0};
         }
 
         const spawned = [];
