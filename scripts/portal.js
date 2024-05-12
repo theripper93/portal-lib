@@ -187,15 +187,9 @@ export class Portal {
         }
     }
 
-    //final methods
-
-    async pick(options = {}) {
-        await this.#preValidateAndProcessData();
-
+    async #getTemplateData() {
         const templateDocument = new MeasuredTemplateDocument();
         templateDocument.updateSource({distance: this.#data.distance, fillColor: this.#data.color, texture: this.#data.texture});
-        
-        let result;
 
         if (game.Levels3DPreview?._active) {
             templateDocument.updateSource({distance: this.#data.distance / 2});
@@ -203,12 +197,20 @@ export class Portal {
             const centerCoords = canvas.grid.getCenter(template3d.x, template3d.y);
             template3d.x = centerCoords[0];
             template3d.y = centerCoords[1];
-            result = new MeasuredTemplateDocument(template3d);
+            return new MeasuredTemplateDocument(template3d);
         } else {
             const templatePreview = new TemplatePreview(templateDocument, { origin: this.#data.origin, range: this.#data.range });
-            result = await templatePreview.drawPreview();
+            return await templatePreview.drawPreview();
         }
+    }
 
+    //final methods
+
+    async pick(options = {}) {
+        await this.#preValidateAndProcessData();
+
+
+        const result = await this.#getTemplateData();
 
         if (result) {
             if (this.#data.origin && this.#data.range) {
