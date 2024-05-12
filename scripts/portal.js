@@ -245,7 +245,8 @@ export class Portal {
         const spawned = [];
 
         for (let ti = 0; ti < this.#tokens.length; ti++) {
-            const count = this.#counts[ti];
+            const roll = new Roll(this.#counts[ti]);
+            const count = (await roll.evaluate()).total;
             const tokenDocument = this.#tokens[ti];
             const offsetPosition = {x: position.x - (tokenDocument.width / 2) * canvas.scene.dimensions.size, y: position.y - (tokenDocument.height / 2) * canvas.scene.dimensions.size, elevation: position.elevation};
             for (let i = 0; i < count; i++) {
@@ -260,7 +261,7 @@ export class Portal {
         return spawned;
     }
 
-    async dialog(options = {spawn: true, title: `${MODULE_ID}.DIALOG.Title`}) {
+    async dialog(options = {spawn: true, multipleChoice: false, title: `${MODULE_ID}.DIALOG.Title`}) {
         await this.#preValidateAndProcessData();
         const dialogData = this.#tokens.map((token, index) => ({token, count: this.#counts[index], index}));
         const html = await renderTemplate("modules/portal-lib/templates/dialog.hbs", {dialogData});
@@ -270,6 +271,7 @@ export class Portal {
                 content.querySelectorAll("li").forEach((li, index) => {
                     if(index === 0) li.classList.add("selected");
                     li.addEventListener("click", (e) => {
+                        if(!options.multipleChoice) content.querySelectorAll("li").forEach((i) => i.classList.remove("selected"));
                         li.classList.toggle("selected");
                     })
                 })
@@ -284,7 +286,7 @@ export class Portal {
         selected.forEach((li) => {
             const index = parseInt(li.dataset.index);
             const token = this.#tokens[index];
-            const count = parseInt(li.querySelector("input").value);
+            const count = li.querySelector("input").value;
             const updateData = this.#updateData[index];
             newTokens.push(token);
             newCounts.push(count);
