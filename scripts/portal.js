@@ -9,7 +9,7 @@ const DEFAULT_DATA = {
 };
 
 export class Portal {
-    constructor(options) {
+    constructor(options = {}) {
         this.#data = foundry.utils.mergeObject(foundry.utils.deepClone(DEFAULT_DATA), options);
     }
 
@@ -245,7 +245,7 @@ export class Portal {
         const spawned = [];
 
         for (let ti = 0; ti < this.#tokens.length; ti++) {
-            const roll = new Roll(this.#counts[ti]);
+            const roll = new Roll(this.#counts[ti].toString());
             const count = (await roll.evaluate()).total;
             const tokenDocument = this.#tokens[ti];
             const offsetPosition = {x: position.x - (tokenDocument.width / 2) * canvas.scene.dimensions.size, y: position.y - (tokenDocument.height / 2) * canvas.scene.dimensions.size, elevation: position.elevation};
@@ -353,7 +353,8 @@ export class Portal {
     }
 
     static async spawn(options = {}) {
-        const portal = new Portal(options);
+        const portal = new Portal();
+        portal.addCreature(options);
         return await portal.spawn();
     }
 }

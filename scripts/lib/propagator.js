@@ -56,11 +56,10 @@ export class Propagator {
         }
       }
       const wallCollisions =
-        canvas.walls.checkCollision(
-          new Ray(origin, {
+      CONFIG.Canvas.polygonBackends.move.testCollision(origin, {
             x: position.x + tokenData.width / 2,
             y: position.y + tokenData.height / 2,
-          }),
+          },
           { type: "move" }
         )?.length ?? 0;
   
