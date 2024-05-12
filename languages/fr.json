@@ -1,0 +1,13 @@
+{
+    "portal-lib": {
+        "ERR": {
+            "InvalidColor": "Portail : Couleur invalide",
+            "InvalidNumber": "Portail : Numéro invalide",
+            "InvalidOrigin": "Portail : origine invalide",
+            "InvalidTexture": "Portail : texture invalide",
+            "NoTeleportTarget": "Portail : Pas de cible de téléportation",
+            "NoTokenData": "Portail : aucune donnée de jeton",
+            "OutOfRange": "Portail : Hors de portée, veuillez choisir un nouvel emplacement"
+        }
+    }
+}

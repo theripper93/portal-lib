@@ -57,7 +57,7 @@ export class Portal {
         if (creature instanceof TokenDocument) tokenData = creature.toObject();
         if (creature instanceof Actor || typeof creature === "string") tokenData = this.#processAsyncCreature(creature);
 
-        if (!tokenData) ui.notifications.error(`${MODULE_ID}.ERR.NoTokenData`);
+        if (!tokenData) ui.notifications.error(`${MODULE_ID}.ERR.NoTokenData`, { localize: true });
 
         this.#tokens.push(tokenData);
         this.#updateData.push(updateData);
@@ -72,7 +72,7 @@ export class Portal {
         }
 
         if (!origin || !Number.isFinite(origin.x) || !Number.isFinite(origin.y)) {
-            ui.notifications.error(`${MODULE_ID}.ERR.InvalidOrigin`);
+            ui.notifications.error(`${MODULE_ID}.ERR.InvalidOrigin`, { localize: true });
             return this;
         }
         if (origin.center) {
@@ -95,7 +95,7 @@ export class Portal {
         if (Number.isFinite(radius)) {
             this.#data.distance = radius;
         } else {
-            ui.notifications.error(`${MODULE_ID}.ERR.InvalidNumber`);
+            ui.notifications.error(`${MODULE_ID}.ERR.InvalidNumber`, { localize: true });
         }
         return this;
     }
@@ -109,7 +109,7 @@ export class Portal {
         if (Number.isFinite(range)) {
             this.#data.range = range;
         } else {
-            ui.notifications.error(`${MODULE_ID}.ERR.InvalidNumber`);
+            ui.notifications.error(`${MODULE_ID}.ERR.InvalidNumber`, { localize: true });
         }
         return this;
     }
@@ -118,7 +118,7 @@ export class Portal {
         if (typeof texture === "string") {
             this.#data.texture = texture;
         } else {
-            ui.notifications.error(`${MODULE_ID}.ERR.InvalidTexture`);
+            ui.notifications.error(`${MODULE_ID}.ERR.InvalidTexture`, { localize: true });
         }
         return this;
     }
@@ -202,7 +202,7 @@ export class Portal {
             if (this.#data.origin && this.#data.range) {
                 const distance = canvas.grid.measureDistance(this.#data.origin, { x: result.x, y: result.y });
                 if (distance > this.#data.range) {
-                    ui.notifications.error(`${MODULE_ID}.ERR.OutOfRange`);
+                    ui.notifications.error(`${MODULE_ID}.ERR.OutOfRange`, { localize: true });
                     return this.pick(options);
                 }
             }
@@ -245,7 +245,7 @@ export class Portal {
     async teleport(options = {}) {
         const targetToken = this.#data.teleportTarget;
         if (!targetToken) {
-            ui.notifications.error(`${MODULE_ID}.ERR.NoTeleportTarget`);
+            ui.notifications.error(`${MODULE_ID}.ERR.NoTeleportTarget`, { localize: true });
             return false;
         }
         await this.#preValidateAndProcessData();

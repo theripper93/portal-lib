@@ -1,0 +1,13 @@
+{
+    "portal-lib": {
+        "ERR": {
+            "InvalidColor": "Portal: Ungültige Farbe",
+            "InvalidNumber": "Portal: Ungültige Nummer",
+            "InvalidOrigin": "Portal: Ungültiger Ursprung",
+            "InvalidTexture": "Portal: Ungültige Textur",
+            "NoTeleportTarget": "Portal: Kein Teleportziel",
+            "NoTokenData": "Portal: Keine Token-Daten",
+            "OutOfRange": "Portal: Außerhalb der Reichweite, bitte wählen Sie einen neuen Standort"
+        }
+    }
+}

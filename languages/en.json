@@ -2,6 +2,15 @@
     "portal-lib": {
         "settings": {},
         "app": {},
-        "flags": {}
+        "flags": {},
+        "ERR": {
+            "InvalidOrigin": "Portal: Invalid origin",
+            "InvalidTexture": "Portal: Invalid texture",
+            "InvalidNumber": "Portal: Invalid number",
+            "InvalidColor": "Portal: Invalid color",
+            "NoTokenData": "Portal: No token data",
+            "NoTeleportTarget": "Portal: No teleport target",
+            "OutOfRange": "Portal: Out of range, please pick a new location"
+        }
     }
 }

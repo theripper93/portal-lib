@@ -1,0 +1,13 @@
+{
+    "portal-lib": {
+        "ERR": {
+            "InvalidColor": "ポータル: 無効な色",
+            "InvalidNumber": "ポータル: 無効な番号",
+            "InvalidOrigin": "ポータル: 無効なオリジン",
+            "InvalidTexture": "ポータル: 無効なテクスチャ",
+            "NoTeleportTarget": "ポータル: テレポート ターゲットがありません",
+            "NoTokenData": "ポータル: トークン データなし",
+            "OutOfRange": "ポータル: 範囲外です。新しい場所を選択してください"
+        }
+    }
+}
