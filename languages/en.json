@@ -11,6 +11,9 @@
             "NoTokenData": "Portal: No token data",
             "NoTeleportTarget": "Portal: No teleport target",
             "OutOfRange": "Portal: Out of range, please pick a new location"
+        },
+        "DIALOG": {
+            "Title": "Portal: Spawn Creatures"
         }
     }
 }

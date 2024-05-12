@@ -1,0 +1,11 @@
+<ul class="portal-list">
+    {{#each dialogData as |creature index|}}
+    <li data-index="{{index}}">
+        <div class="portal-creature-title">
+            <img src="{{creature.token.texture.src}}" alt="">
+            <span>{{creature.token.name}}</span>
+        </div>
+        <input type="number" value="{{creature.count}}" min="0" max="100" step="1">
+    </li>
+    {{/each}}
+</ul>

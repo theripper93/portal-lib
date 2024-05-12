@@ -1,0 +1,39 @@
+.portal-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.portal-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 5px;
+  border-radius: 5px;
+  padding: 0 0.3rem;
+}
+.portal-list li.selected {
+  background: rgba(0, 0, 0, 0.2);
+}
+.portal-list li .portal-creature-title {
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+.portal-list li .portal-creature-title img {
+  width: 50px;
+  height: 50px;
+  border-radius: 5px;
+  border: none;
+  margin-right: 10px;
+}
+.portal-list li .portal-creature-title span {
+  font-size: 1.2em;
+}
+.portal-list li input {
+  width: 50px;
+  height: 50px;
+  border: none;
+  background: none;
+  text-align: center;
+  font-size: 1.2em;
+}/*# sourceMappingURL=module.css.map */

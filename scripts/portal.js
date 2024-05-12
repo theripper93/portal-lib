@@ -231,6 +231,7 @@ export class Portal {
     }
 
     async spawn(options = {}) {
+        if (Array.isArray(options) || (typeof options === "string")) this.addCreature(options)
         await this.#preValidateAndProcessData();
         let position;
         if (!this.#template) {
@@ -258,6 +259,46 @@ export class Portal {
 
         return spawned;
     }
+
+    async dialog(options = {spawn: true, title: `${MODULE_ID}.DIALOG.Title`}) {
+        await this.#preValidateAndProcessData();
+        const dialogData = this.#tokens.map((token, index) => ({token, count: this.#counts[index], index}));
+        const html = await renderTemplate("modules/portal-lib/templates/dialog.hbs", {dialogData});
+        const result = await Dialog.prompt({
+            title: game.i18n.localize(options.title) , content: html, close: () => { return false }, callback: (html) => {return html}, render: (html) => {
+                const content = html[0];
+                content.querySelectorAll("li").forEach((li, index) => {
+                    if(index === 0) li.classList.add("selected");
+                    li.addEventListener("click", (e) => {
+                        li.classList.toggle("selected");
+                    })
+                })
+            }
+        })
+        if (!result) return false;
+        const ul = result[0].querySelector("ul");
+        const selected = ul.querySelectorAll("li.selected");
+        const newTokens = [];
+        const newCounts = [];
+        const newUpdateData = [];
+        selected.forEach((li) => {
+            const index = parseInt(li.dataset.index);
+            const token = this.#tokens[index];
+            const count = parseInt(li.querySelector("input").value);
+            const updateData = this.#updateData[index];
+            newTokens.push(token);
+            newCounts.push(count);
+            newUpdateData.push(updateData);
+        });
+        this.#tokens = newTokens;
+        this.#counts = newCounts;
+        this.#updateData = newUpdateData;
+        if(options.spawn) {
+            return await this.spawn();
+        } else {
+            return this;
+        }
+    }   
 
     async teleport(options = {}) {
         const targetToken = this.#data.teleportTarget;
@@ -307,6 +348,11 @@ export class Portal {
             },
         );
         return this;
+    }
+
+    static async spawn(options = {}) {
+        const portal = new Portal(options);
+        return await portal.spawn();
     }
 }
 
