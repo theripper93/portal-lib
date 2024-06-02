@@ -189,11 +189,11 @@ export class Portal {
 
     async #getTemplateData() {
         const templateDocument = new MeasuredTemplateDocument();
-        templateDocument.updateSource({distance: this.#data.distance, fillColor: this.#data.color, texture: this.#data.texture});
+        templateDocument.updateSource({ distance: this.#data.distance, fillColor: this.#data.color, texture: this.#data.texture });
 
         if (game.Levels3DPreview?._active) {
-            templateDocument.updateSource({distance: this.#data.distance / 2});
-            const template3d = await game.Levels3DPreview.CONFIG.entityClass.Template3D.drawPreview({document: templateDocument}, false);
+            templateDocument.updateSource({ distance: this.#data.distance / 2 });
+            const template3d = await game.Levels3DPreview.CONFIG.entityClass.Template3D.drawPreview({ document: templateDocument }, false);
             const centerCoords = canvas.grid.getCenter(template3d.x, template3d.y);
             template3d.x = centerCoords[0];
             template3d.y = centerCoords[1];
@@ -208,7 +208,6 @@ export class Portal {
 
     async pick(options = {}) {
         await this.#preValidateAndProcessData();
-
 
         const result = await this.#getTemplateData();
 
@@ -231,7 +230,7 @@ export class Portal {
     }
 
     async spawn(options = {}) {
-        if (Array.isArray(options) || (typeof options === "string")) this.addCreature(options)
+        if (Array.isArray(options) || typeof options === "string") this.addCreature(options);
         await this.#preValidateAndProcessData();
         let position;
         if (!this.#template) {
@@ -239,7 +238,7 @@ export class Portal {
             if (!picked) return false;
             position = picked;
         } else {
-            position = {x : this.#template.x, y : this.#template.y, elevation : this.#template.elevation ?? 0};
+            position = { x: this.#template.x, y: this.#template.y, elevation: this.#template.elevation ?? 0 };
         }
 
         const spawned = [];
@@ -248,7 +247,7 @@ export class Portal {
             const roll = new Roll(this.#counts[ti].toString());
             const count = (await roll.evaluate()).total;
             const tokenDocument = this.#tokens[ti];
-            const offsetPosition = {x: position.x - (tokenDocument.width / 2) * canvas.scene.dimensions.size, y: position.y - (tokenDocument.height / 2) * canvas.scene.dimensions.size, elevation: position.elevation};
+            const offsetPosition = { x: position.x - (tokenDocument.width / 2) * canvas.scene.dimensions.size, y: position.y - (tokenDocument.height / 2) * canvas.scene.dimensions.size, elevation: position.elevation };
             for (let i = 0; i < count; i++) {
                 const tPos = Propagator.getFreePosition(tokenDocument, offsetPosition, true);
                 tokenDocument.updateSource({ x: tPos.x, y: tPos.y, elevation: offsetPosition.elevation });
@@ -261,22 +260,30 @@ export class Portal {
         return spawned;
     }
 
-    async dialog(options = {spawn: true, multipleChoice: false, title: `${MODULE_ID}.DIALOG.Title`}) {
+    async dialog(options = { spawn: true, multipleChoice: false, title: `${MODULE_ID}.DIALOG.Title` }) {
         await this.#preValidateAndProcessData();
-        const dialogData = this.#tokens.map((token, index) => ({token, count: this.#counts[index], index}));
-        const html = await renderTemplate("modules/portal-lib/templates/dialog.hbs", {dialogData});
+        const dialogData = this.#tokens.map((token, index) => ({ token, count: this.#counts[index], index }));
+        const html = await renderTemplate("modules/portal-lib/templates/dialog.hbs", { dialogData });
         const result = await Dialog.prompt({
-            title: game.i18n.localize(options.title) , content: html, close: () => { return false }, callback: (html) => {return html}, render: (html) => {
+            title: game.i18n.localize(options.title),
+            content: html,
+            close: () => {
+                return false;
+            },
+            callback: (html) => {
+                return html;
+            },
+            render: (html) => {
                 const content = html[0];
                 content.querySelectorAll("li").forEach((li, index) => {
-                    if(index === 0) li.classList.add("selected");
+                    if (index === 0) li.classList.add("selected");
                     li.addEventListener("click", (e) => {
-                        if(!options.multipleChoice) content.querySelectorAll("li").forEach((i) => i.classList.remove("selected"));
+                        if (!options.multipleChoice) content.querySelectorAll("li").forEach((i) => i.classList.remove("selected"));
                         li.classList.toggle("selected");
-                    })
-                })
-            }
-        })
+                    });
+                });
+            },
+        });
         if (!result) return false;
         const ul = result[0].querySelector("ul");
         const selected = ul.querySelectorAll("li.selected");
@@ -295,12 +302,12 @@ export class Portal {
         this.#tokens = newTokens;
         this.#counts = newCounts;
         this.#updateData = newUpdateData;
-        if(options.spawn) {
+        if (options.spawn) {
             return await this.spawn();
         } else {
             return this;
         }
-    }   
+    }
 
     async teleport(options = {}) {
         const targetToken = this.#data.teleportTarget;
