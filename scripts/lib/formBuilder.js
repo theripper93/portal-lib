@@ -11,6 +11,7 @@ export class FormBuilder {
             width: 560,
             height: "auto",
         },
+        window: {},
     };
 
     #currentTab = null;
@@ -59,7 +60,12 @@ export class FormBuilder {
     }
 
     title(title) {
-        this.#options.title = title;
+        this.#options.window.title = title;
+        return this;
+    }
+
+    resizable(resizable = true) {
+        this.#options.window.resizable = resizable;
         return this;
     }
 
@@ -300,14 +306,15 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
             this.resolve = resolve;
             this.reject = reject;
         });
-        this._title = data.options.title;
-        this._info = data.options.info;
+        this.#info = data.options.info;
         this.processFormStructure(data);
     }
 
     #fields;
 
     #buttons;
+
+    #info;
 
     static DEFAULT_OPTIONS = {
         classes: ["form-helper"],
@@ -337,10 +344,6 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
             template: "templates/generic/form-footer.hbs",
         },
     };
-
-    get title() {
-        return this._title;
-    }
 
     processFormStructure(data) {
         if (data.tabs?.length) {
@@ -373,9 +376,16 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
         return {
             tabs: this.#getTabs(),
             fields: this.#fields,
-            info: this._info,
+            info: this.#info,
             buttons: [...this.#buttons.filter((b) => b.type !== "submit"), ...this.#buttons.filter((b) => b.type === "submit")],
         };
+    }
+
+    _onRender(context, options) {
+        super._onRender(context, options);
+        if (!this.__tabs) {
+            this.element.querySelector("nav").classList.add("hidden");
+        }
     }
 
     #getTabs() {
