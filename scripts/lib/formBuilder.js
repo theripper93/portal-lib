@@ -1,9 +1,8 @@
 export class FormBuilder {
-
-    constructor () {
+    constructor() {
         this.submitButton();
     }
-    
+
     #tabs = [];
     #fields = [];
     #buttons = [];
@@ -25,18 +24,37 @@ export class FormBuilder {
     }
 
     form() {
-        const app = new FormHelper({tabs: this.#tabs, fields: this.#fields, buttons: this.#buttons, options: this.#options});
+        const app = new FormHelper({ tabs: this.#tabs, fields: this.#fields, buttons: this.#buttons, options: this.#options });
         return app;
+    }
+
+    getHTML() {
+        const app = this.form();
+        const data = app._prepareContext();
+        return renderTemplate("modules/portal-lib/templates/genericForm.hbs", data);
+    }
+
+    async insertHTML(element, selector, insertion = "afterend") {
+        const html = await this.getHTML();
+
+        const tempEl = document.createElement("div");
+        tempEl.innerHTML = html;
+        const insertionEl = tempEl.children[0];
+
+        const el = selector ? element.querySelector(selector) : element;
+        if (!el) throw new Error(`Element ${selector} not found`);
+        el.insertAdjacentElement(insertion, insertionEl);
+        return insertionEl;
     }
 
     #addField(field) {
         if (this.#object) {
             const objectValue = foundry.utils.getProperty(this.#object, field.name);
-            if(objectValue !== undefined) field.value = objectValue;
+            if (objectValue !== undefined) field.value = objectValue;
         }
 
-        if(this.#currentFieldset) return this.#currentFieldset.fields.push(field);
-        if(this.#currentTab) return this.#currentTab.fields.push(field);
+        if (this.#currentFieldset) return this.#currentFieldset.fields.push(field);
+        if (this.#currentTab) return this.#currentTab.fields.push(field);
         return this.#fields.push(field);
     }
 
@@ -55,75 +73,75 @@ export class FormBuilder {
         return this;
     }
 
-    size({width, height}) {
+    size({ width, height }) {
         this.#options.position = {
             width: width ?? 560,
             height: height ?? "auto",
-        }
+        };
         return this;
     }
 
-    submitButton({enabled = true, label = "Confirm", icon = "fa-solid fa-check"} = {}) {
+    submitButton({ enabled = true, label = "Confirm", icon = "fa-solid fa-check" } = {}) {
         const submitButton = {
             type: "submit",
             action: "submit",
             icon,
             label,
-        }
-        if (!enabled) this.#buttons = this.#buttons.filter(b => b.action !== "submit");
+        };
+        if (!enabled) this.#buttons = this.#buttons.filter((b) => b.action !== "submit");
         else this.#buttons.push(submitButton);
         return this;
     }
 
-    tab({id, group, icon, label, active = false} = {}) {
+    tab({ id, group, icon, label, active = false } = {}) {
         group ??= "sheet";
         if (!id && this.#currentTab) {
             this.#currentTab = null;
             return this;
         }
-        if(!id) throw new Error("You must provide an id for the tab");
+        if (!id) throw new Error("You must provide an id for the tab");
         const tab = {
             id,
             group,
             icon,
             label,
             active,
-            fields : [],
-        }
+            fields: [],
+        };
         this.#tabs.push(tab);
         this.#currentTab = tab;
         return this;
     }
 
-    fieldset({legend} = {}) {
+    fieldset({ legend } = {}) {
         if (!legend && this.#currentFieldset) {
             this.#currentFieldset = null;
             return this;
         }
-        if(!legend) throw new Error("You must provide a legend for the fieldset");
+        if (!legend) throw new Error("You must provide a legend for the fieldset");
         const fieldset = {
             legend,
             fieldset: true,
-            fields : [],
-        }
+            fields: [],
+        };
         this.#addField(fieldset);
         this.#currentFieldset = fieldset;
         return this;
     }
 
-    text({name, label, hint, value}) {
+    text({ name, label, hint, value }) {
         const field = {
             field: new foundry.data.fields.StringField(),
             name,
             label,
             hint,
             value,
-        }
-        this.#addField(field)
+        };
+        this.#addField(field);
         return this;
     }
 
-    number({name, label, hint, value, min, max, step}) {
+    number({ name, label, hint, value, min, max, step }) {
         const field = {
             field: new foundry.data.fields.NumberField(),
             name,
@@ -133,39 +151,39 @@ export class FormBuilder {
             min,
             max,
             step,
-        }
-        this.#addField(field)
+        };
+        this.#addField(field);
         return this;
     }
 
-    checkbox({name, label, hint, value}) {
+    checkbox({ name, label, hint, value }) {
         const field = {
             field: new foundry.data.fields.BooleanField(),
             name,
             label,
             hint,
             value,
-        }
-        this.#addField(field)
+        };
+        this.#addField(field);
         return this;
     }
 
-    color({name, label, hint, value}) {
+    color({ name, label, hint, value }) {
         const field = {
             field: new foundry.data.fields.ColorField(),
             name,
             label,
             hint,
             value,
-        }
-        this.#addField(field)
+        };
+        this.#addField(field);
         return this;
     }
 
-    file({name, type, label, hint, value}) {
+    file({ name, type, label, hint, value }) {
         type ??= "imagevideo";
         const types = FILE_PICKER_TYPES[type];
-        const dataField = new foundry.data.fields.FilePathField({categories: types});
+        const dataField = new foundry.data.fields.FilePathField({ categories: types });
         dataField.categories = [type];
         const field = {
             field: dataField,
@@ -174,28 +192,28 @@ export class FormBuilder {
             hint,
             type,
             value,
-        }
-        this.#addField(field)
+        };
+        this.#addField(field);
         return this;
     }
 
-    select({name, label, hint, value, options}) {
+    select({ name, label, hint, value, options }) {
         const dType = inferSelectDataType(options);
         const field = {
-            field: dType === Number ? new foundry.data.fields.NumberField({choices: options}) : new foundry.data.fields.StringField({choices: options}),
+            field: dType === Number ? new foundry.data.fields.NumberField({ choices: options }) : new foundry.data.fields.StringField({ choices: options }),
             name,
             label,
             hint,
             value,
             options,
-        }
-        this.#addField(field)
+        };
+        this.#addField(field);
         return this;
     }
 
-    multiSelect({name, label, hint, value, options}) {
+    multiSelect({ name, label, hint, value, options }) {
         const dType = inferSelectDataType(options);
-        const dataField = dType === Number ? new foundry.data.fields.NumberField({choices: options}) : new foundry.data.fields.StringField({choices: options});
+        const dataField = dType === Number ? new foundry.data.fields.NumberField({ choices: options }) : new foundry.data.fields.StringField({ choices: options });
         const field = {
             field: new foundry.data.fields.SetField(dataField),
             name,
@@ -203,24 +221,24 @@ export class FormBuilder {
             hint,
             value,
             options,
-        }
-        this.#addField(field)
+        };
+        this.#addField(field);
         return this;
     }
 
-    editor({name, label, hint, value}) {
+    editor({ name, label, hint, value }) {
         const field = {
             field: new foundry.data.fields.HTMLField(),
             name,
             label,
             hint,
             value,
-        }
-        this.#addField(field)
+        };
+        this.#addField(field);
         return this;
     }
 
-    textArea({name, label, hint, value}) {
+    textArea({ name, label, hint, value }) {
         const field = {
             field: new foundry.data.fields.JSONField(),
             name,
@@ -228,12 +246,12 @@ export class FormBuilder {
             hint,
             value,
             stacked: true,
-        }
-        this.#addField(field)
+        };
+        this.#addField(field);
         return this;
     }
 
-    button({label, action, icon, callback}) {
+    button({ label, action, icon, callback }) {
         action ??= foundry.utils.randomID();
         const button = {
             action,
@@ -241,29 +259,29 @@ export class FormBuilder {
             icon,
             label,
             callback,
-        }
+        };
         this.#buttons.push(button);
         return this;
     }
 }
 
 const FILE_PICKER_TYPES = {
-    "imagevideo": ["IMAGE", "VIDEO"],
-    "image": ["IMAGE"],
-    "video": ["VIDEO"],
-    "audio": ["AUDIO"],
-    "font": ["FONT"],
-    "graphics": ["GRAPHICS"],
-}
+    imagevideo: ["IMAGE", "VIDEO"],
+    image: ["IMAGE"],
+    video: ["VIDEO"],
+    audio: ["AUDIO"],
+    font: ["FONT"],
+    graphics: ["GRAPHICS"],
+};
 
 function inferSelectDataType(options) {
     const values = Object.keys(options);
     try {
-        const isNumber = values.every(v => {
+        const isNumber = values.every((v) => {
             const n = JSON.parse(v);
             return typeof n === "number";
-        })
-        if(isNumber) return Number;
+        });
+        if (isNumber) return Number;
     } catch (e) {
         return String;
     }
@@ -271,12 +289,11 @@ function inferSelectDataType(options) {
 }
 
 export class FormHelper extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2) {
-
-    constructor (data) {
+    constructor(data) {
         data = data ?? testData;
         const actions = {};
-        data.buttons.forEach(b => actions[b.action] = b.callback);
-        super({actions, ...data.options});
+        data.buttons.forEach((b) => (actions[b.action] = b.callback));
+        super({ actions, ...data.options });
         this.resolve;
         this.reject;
         this.promise = new Promise((resolve, reject) => {
@@ -288,11 +305,9 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
         this.processFormStructure(data);
     }
 
-
     #fields;
 
     #buttons;
-
 
     static DEFAULT_OPTIONS = {
         classes: ["form-helper"],
@@ -308,8 +323,7 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
             handler: this.#onSubmit,
             closeOnSubmit: true,
         },
-        actions: {
-        },
+        actions: {},
     };
 
     static PARTS = {
@@ -332,7 +346,7 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
         if (data.tabs?.length) {
             this.__tabs = {};
             const active = data.tabs.find((t) => t.active);
-            if(!active) data.tabs[0].active = true;
+            if (!active) data.tabs[0].active = true;
             for (const tab of data.tabs) {
                 this.__tabs[tab.id] = {
                     id: tab.id,
@@ -341,7 +355,7 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
                     label: tab.label,
                     active: tab.active ?? false,
                     fields: tab.fields ?? [],
-                }
+                };
             }
         }
 
@@ -352,18 +366,15 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
 
     _onClose(options) {
         super._onClose(options);
-        if(!this.promise.resolved) this.resolve(false);
+        if (!this.promise.resolved) this.resolve(false);
     }
 
-    async _prepareContext(options) {
+    _prepareContext(options) {
         return {
             tabs: this.#getTabs(),
             fields: this.#fields,
             info: this._info,
-            buttons: [
-                ...this.#buttons.filter(b => b.type !== "submit"),
-                ...this.#buttons.filter(b => b.type === "submit")
-            ],
+            buttons: [...this.#buttons.filter((b) => b.type !== "submit"), ...this.#buttons.filter((b) => b.type === "submit")],
         };
     }
 
@@ -383,6 +394,11 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
     _onChangeForm(formConfig, event) {
         super._onChangeForm(formConfig, event);
         const formData = new FormDataExtended(this.element);
+    }
+
+    getFormData() {
+        const formData = new FormDataExtended(this.element);
+        return foundry.utils.expandObject(formData.object);
     }
 
     static async #onSubmit(event, form, formData) {
