@@ -365,15 +365,3 @@ export class Portal {
         return await portal.spawn();
     }
 }
-
-//example
-/*
-new Portal()
-    .addCreature("Aboleth", {count: 3})
-    .color("#ff0000")
-    .texture("icons/svg/dice-target.svg")
-    .origin(token)
-    .range(60)
-    .spawn();
-
-    */
