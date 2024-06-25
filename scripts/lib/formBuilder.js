@@ -9,9 +9,7 @@ export class FormBuilder {
     #tabs = [];
     #fields = [];
     #buttons = [];
-    #options = {
-        enableSubmit: true,
-    };
+    #options = {};
 
     #currentTab = null;
     #currentFieldset = null;
@@ -46,11 +44,6 @@ export class FormBuilder {
 
     object(object) {
         this.#object = object;
-        return this;
-    }
-
-    enableSubmit(enable = true) {
-        this.#options.enableSubmit = enable;
         return this;
     }
 

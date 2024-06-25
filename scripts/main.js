@@ -8,10 +8,6 @@ export const MODULE_ID = "portal-lib";
 
 globalThis.Portal = Portal;
 
-globalThis.FormHelper = FormHelper
-
-globalThis.FormBuilder = FormBuilder;
-
 Hooks.on("init", () => {
     initConfig();
     registerSettings();

@@ -1,6 +1,7 @@
 import { Propagator } from "./lib/propagator.js";
 import { MODULE_ID } from "./main.js";
-import { TemplatePreview } from "./templatePreview.js";
+import {TemplatePreview} from "./templatePreview.js";
+import {FormBuilder} from "./lib/formBuilder.js";
 
 const DEFAULT_DATA = {
     origin: null,
@@ -12,6 +13,8 @@ export class Portal {
     constructor(options = {}) {
         this.#data = foundry.utils.mergeObject(foundry.utils.deepClone(DEFAULT_DATA), options);
     }
+
+    static FormBuilder = FormBuilder;
 
     #data;
 
