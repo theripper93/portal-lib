@@ -7,7 +7,12 @@ export class FormBuilder {
     #tabs = [];
     #fields = [];
     #buttons = [];
-    #options = {};
+    #options = {
+        position: {
+            width: 560,
+            height: "auto",
+        },
+    };
 
     #currentTab = null;
     #currentFieldset = null;
@@ -47,6 +52,14 @@ export class FormBuilder {
 
     object(object) {
         this.#object = object;
+        return this;
+    }
+
+    size({width, height}) {
+        this.#options.position = {
+            width: width ?? 560,
+            height: height ?? "auto",
+        }
         return this;
     }
 
@@ -263,7 +276,7 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
         data = data ?? testData;
         const actions = {};
         data.buttons.forEach(b => actions[b.action] = b.callback);
-        super({actions});
+        super({actions, ...data.options});
         this.resolve;
         this.reject;
         this.promise = new Promise((resolve, reject) => {
