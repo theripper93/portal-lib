@@ -42,6 +42,11 @@ export class FormBuilder {
         return this;
     }
 
+    info(info) {
+        this.#options.info = info;
+        return this;
+    }
+
     object(object) {
         this.#object = object;
         return this;

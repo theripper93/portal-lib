@@ -1,91 +1,6 @@
-export const testData = {
-    tabs: [
-        {
-            id: "basic",
-            group: "sheet",
-            icon: "fa-solid fa-lightbulb",
-            label: "AMBIENT_LIGHT.SECTIONS.BASIC",
-            fields: [
-                {
-                    field: new foundry.data.fields.StringField(),
-                    name: "test",
-                    label: "Test",
-                    type: "text",
-                    value: "test",
-                    hint: "this is a hint",
-                },
-                {
-                    fieldset: true,
-                    legend: "Test",
-                    fields: [
-                        {
-                            field: new foundry.data.fields.StringField(),
-                            name: "test2",
-                            label: "Test 2",
-                            type: "text",
-                            value: "test",
-                            hint: "this is a hint",
-                        },
-                        {
-                            field: new foundry.data.fields.StringField(),
-                            name: "test3",
-                            label: "Test 3",
-                            type: "text",
-                            value: "test",
-                            hint: "this is a hint",
-                        },
-                    ]
-                }
-            ]
-        },
-        {
-            id: "animation",
-            group: "sheet",
-            icon: "fa-solid fa-play",
-            label: "AMBIENT_LIGHT.SECTIONS.ANIMATION",
-        },
-        {
-            id: "advanced",
-            group: "sheet",
-            icon: "fa-solid fa-cogs",
-            label: "AMBIENT_LIGHT.SECTIONS.ADVANCED",
-        },
-    ],
-    fields: [
-        {
-            field: new foundry.data.fields.StringField(),
-            name: "test4",
-            label: "Test 2",
-            type: "text",
-            value: "test",
-            hint: "this is a hint",
-        },
-        {
-            field: new foundry.data.fields.StringField(),
-            name: "test6",
-            label: "Test 3",
-            type: "text",
-            value: "test",
-            hint: "this is a hint",
-        },
-    ],
-    buttons: [
-        {
-            action: "test",
-            type: "button",
-            icon: "fas fa-cube",
-            label: "TEST",
-            callback: (event, element) => console.log(event, element)
-        }
-    ]
-}
-
-
-
 export class FormHelper extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2) {
 
     constructor (data) {
-        console.log(data)
         data = data ?? testData;
         const actions = {};
         data.buttons.forEach(b => actions[b.action] = b.callback);
@@ -97,6 +12,7 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
             this.reject = reject;
         });
         this._title = data.options.title;
+        this._info = data.options.info;
         this.processFormStructure(data);
     }
 
@@ -171,6 +87,7 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
         return {
             tabs: this.#getTabs(),
             fields: this.#fields,
+            info: this._info,
             buttons: [
                 ...this.#buttons.filter(b => b.type !== "submit"),
                 ...this.#buttons.filter(b => b.type === "submit")
