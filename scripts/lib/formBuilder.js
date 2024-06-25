@@ -197,6 +197,31 @@ export class FormBuilder {
         return this;
     }
 
+    editor({name, label, hint, value}) {
+        const field = {
+            field: new foundry.data.fields.HTMLField(),
+            name,
+            label,
+            hint,
+            value,
+        }
+        this.#addField(field)
+        return this;
+    }
+
+    textArea({name, label, hint, value}) {
+        const field = {
+            field: new foundry.data.fields.JSONField(),
+            name,
+            label,
+            hint,
+            value,
+            stacked: true,
+        }
+        this.#addField(field)
+        return this;
+    }
+
     button({label, action, icon, callback}) {
         action ??= foundry.utils.randomID();
         const button = {
