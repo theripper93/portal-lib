@@ -1,7 +1,7 @@
 import { Propagator } from "./lib/propagator.js";
 import { MODULE_ID } from "./main.js";
-import {TemplatePreview} from "./templatePreview.js";
-import {FormBuilder} from "./lib/formBuilder.js";
+import { TemplatePreview } from "./templatePreview.js";
+import { FormBuilder } from "./lib/formBuilder.js";
 
 const DEFAULT_DATA = {
     origin: null,
@@ -158,7 +158,8 @@ export class Portal {
         this.#validated = true;
         await this.#resolveTokenData();
         if (!Number.isFinite(this.#data.distance)) {
-            const firstToken = this.#tokens[0];
+            console.log(this.#tokens);
+            const firstToken = this.#tokens[0] ?? this.#data.teleportTarget;
             const size = firstToken ? Math.max(firstToken.width, firstToken.height) : 1;
             this.#data.distance = size * canvas.scene.dimensions.distance;
         }
@@ -312,7 +313,9 @@ export class Portal {
         }
     }
 
-    async teleport(options = {}) {
+    async teleport(token, range) {
+        if (!token && !this.#data.teleportTarget) this.origin(canvas.tokens.controlled[0]);
+        if (Number.isFinite(range)) this.range(range);
         const targetToken = this.#data.teleportTarget;
         if (!targetToken) {
             ui.notifications.error(`${MODULE_ID}.ERR.NoTeleportTarget`, { localize: true });
@@ -321,9 +324,16 @@ export class Portal {
         await this.#preValidateAndProcessData();
         let position;
         if (!this.#template) {
-            const picked = await this.pick(options);
+            const picked = await this.pick({});
             if (!picked) return false;
-            position = picked;
+            const gridAligned = canvas.grid.getTopLeftPoint(picked);
+            position = gridAligned;
+            //calc offset
+            const maxSize = Math.max(targetToken.width, targetToken.height);
+            const offsetMulti = Math.floor(maxSize / 2);
+            const offset = {x: -canvas.grid.size * offsetMulti, y: -canvas.grid.size * offsetMulti};
+            position.x += offset.x;
+            position.y += offset.y;
         }
         //fade out token
         const placeable = targetToken.object;

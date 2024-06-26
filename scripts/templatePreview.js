@@ -18,19 +18,14 @@ export class TemplatePreview {
 
     #onMove(event) {
         let coords = canvas.canvasCoordinatesFromClient({ x: event.clientX, y: event.clientY });
-        coords = [coords.x, coords.y];
-        //coords = canvas.grid.getCenter(coords[0], coords[1]);
-        //coords = canvas.grid.getTopLeft(coords[0], coords[1]);
-        //if distance is not even, snap to center
         if (!this.isEvenDistance) {
-            coords = canvas.grid.getCenter(coords[0], coords[1]);
+            coords = canvas.grid.getCenterPoint(coords);
         } else {
-            const snapped = canvas.grid.getSnappedPosition(coords[0], coords[1]);
-            coords = [snapped.x, snapped.y];
+            coords = canvas.grid.getSnappedPoint(coords, {mode: CONST.GRID_SNAPPING_MODES.CORNER});
         }
-        this.document.updateSource({x: coords[0], y: coords[1]});
-        this.previewObject.x = coords[0];
-        this.previewObject.y = coords[1];
+        this.document.updateSource(coords);
+        this.previewObject.x = coords.x;
+        this.previewObject.y = coords.y;
     }
 
     #onMouseUp(event) {
