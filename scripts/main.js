@@ -12,7 +12,6 @@ Hooks.on("init", () => {
 });
 
 Hooks.on("getActorSheetHeaderButtons", (app, buttons) => {
-    console.log("getActorSheetHeaderButtons")
     const actor = app.document ?? app.actor;
     const canRevert = actor.token?.flags[MODULE_ID]?.revertData;
     if(!canRevert) return;

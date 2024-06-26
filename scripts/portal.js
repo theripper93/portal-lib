@@ -290,29 +290,31 @@ export class Portal {
         await this.#preValidateAndProcessData();
         const dialogData = this.#tokens.map((token, index) => ({ token, count: this.#counts[index], index }));
         const html = await renderTemplate("modules/portal-lib/templates/dialog.hbs", { dialogData });
-        const result = await Dialog.prompt({
-            title: game.i18n.localize(options.title),
+        let selectedLi = [];
+        const result = await foundry.applications.api.DialogV2.prompt({
+            window: { title: options.title },
+            position: {width: 400},
             content: html,
             close: () => {
                 return false;
             },
-            callback: (html) => {
-                return html;
-            },
-            render: (html) => {
-                const content = html[0];
+            render: function (e, html, c) {
+                const content = html;
                 content.querySelectorAll("li").forEach((li, index) => {
-                    if (index === 0) li.classList.add("selected");
+                    if (index === 0) {
+                        selectedLi = [li];
+                        li.classList.add("selected");
+                    }
                     li.addEventListener("click", (e) => {
                         if (!options.multipleChoice) content.querySelectorAll("li").forEach((i) => i.classList.remove("selected"));
                         li.classList.toggle("selected");
+                        selectedLi = [...content.querySelectorAll("li.selected")];
                     });
                 });
             },
         });
-        if (!result) return false;
-        const ul = result[0].querySelector("ul");
-        const selected = ul.querySelectorAll("li.selected");
+        if (result !== "ok") return false;
+        const selected = selectedLi;
         const newTokens = [];
         const newCounts = [];
         const newUpdateData = [];
@@ -421,7 +423,7 @@ export class Portal {
 
         if (this.#tokens.length === 0) return ui.notifications.error(`${MODULE_ID}.ERR.InvalidTransformCreature`, { localize: true });
 
-        if (this.#tokens.length > 1) await this.dialog({ spawn: false, multipleChoice: false });
+        if (this.#tokens.length > 1) await this.dialog({ spawn: false, multipleChoice: false, title: `${MODULE_ID}.DIALOG.TransformTitle` });
 
         const transformActor = this.#tokens[0].actor;
 
@@ -450,23 +452,23 @@ export class Portal {
 
         const existing = game.actors.getName(transformedActorData.name);
 
-        const transformedActor = existing ?? await Actor.create(transformedActorData);
+        const transformedActor = existing ?? (await Actor.create(transformedActorData));
 
-        const currentSheetPosition = {top: actor.sheet.position.top, left: actor.sheet.position.left};
+        const currentSheetPosition = { top: actor.sheet.position.top, left: actor.sheet.position.left };
 
         const revertData = {
             tokenData: originalToken.toObject(),
             createdActor: transformedActor.uuid,
             time: Date.now(),
-        }
+        };
 
         //assign actor to new token
         const originalCanvasToken = actor.token ?? actor.getActiveTokens()[0];
         if (originalCanvasToken) {
-            await originalCanvasToken.document.update({...transformedActorData.prototypeToken, actorId: transformedActor.id, flags: {[MODULE_ID]: {revertData}}});
+            await originalCanvasToken.document.update({ ...transformedActorData.prototypeToken, actorId: transformedActor.id, flags: { [MODULE_ID]: { revertData } } });
         }
 
-        originalCanvasToken.actor.sheet.render(true, {...currentSheetPosition});
+        originalCanvasToken.actor.sheet.render(true, { ...currentSheetPosition });
 
         return transformedActor;
     }
@@ -475,16 +477,16 @@ export class Portal {
         const tokenDocument = token.document ?? token;
         const revertData = tokenDocument.getFlag(MODULE_ID, "revertData");
         if (!revertData) return;
-        const currentSheetPosition = {top: tokenDocument.actor.sheet.position.top, left: tokenDocument.actor.sheet.position.left};
+        const currentSheetPosition = { top: tokenDocument.actor.sheet.position.top, left: tokenDocument.actor.sheet.position.left };
         tokenDocument.actor.sheet.close();
         const toDelete = await fromUuid(revertData.createdActor);
-        const confirmDelete = await foundry.applications.api.DialogV2.confirm({position: {width: 400}, window: { title: game.i18n.localize(`${MODULE_ID}.DIALOG.DeleteTitle`)}, content: game.i18n.localize(`${MODULE_ID}.DIALOG.DeleteContent`) + "<hr>" + `<strong>${toDelete.name}</strong>`});
-        if(confirmDelete) toDelete.delete();
+        const confirmDelete = await foundry.applications.api.DialogV2.confirm({ position: { width: 400 }, window: { title: game.i18n.localize(`${MODULE_ID}.DIALOG.DeleteTitle`) }, content: game.i18n.localize(`${MODULE_ID}.DIALOG.DeleteContent`) + "<hr>" + `<strong>${toDelete.name}</strong>` });
+        if (confirmDelete) toDelete.delete();
         const tokenData = revertData.tokenData;
         await tokenDocument.update(tokenData);
         await tokenDocument.unsetFlag(MODULE_ID, "revertData");
-        tokenDocument.actor.sheet.render(true, {...currentSheetPosition});
-        ui.notifications.info(`${MODULE_ID}.INFO.RevertedTransformation`, { localize: true })
+        tokenDocument.actor.sheet.render(true, { ...currentSheetPosition });
+        ui.notifications.info(`${MODULE_ID}.INFO.RevertedTransformation`, { localize: true });
         return tokenDocument;
     }
 }

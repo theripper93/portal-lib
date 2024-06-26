@@ -19,6 +19,7 @@
         },
         "DIALOG": {
             "Title": "Portal: Spawn Creatures",
+            "TransformTitle": "Portal: Chose a creature to transform to",
             "DeleteTitle": "Portal: Delete Transformation Actor",
             "DeleteContent": "The transformation actor is no longer needed and can be deleted. Proceed?"
         }
