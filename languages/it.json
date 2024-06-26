@@ -7,7 +7,18 @@
             "InvalidTexture": "Portale: trama non valida",
             "NoTeleportTarget": "Portale: nessun bersaglio di teletrasporto",
             "NoTokenData": "Portale: nessun dato token",
-            "OutOfRange": "Portale: fuori portata, scegli una nuova posizione"
+            "OutOfRange": "Portale: fuori portata, scegli una nuova posizione",
+            "InvalidTransformCreature": "Portale: creatura con trasformazione non valida",
+            "InvalidTransformTarget": "Portale: destinazione della trasformazione non valida"
+        },
+        "DIALOG": {
+            "DeleteContent": "L'attore della trasformazione non è più necessario e può essere eliminato. \nProcedere?",
+            "DeleteTitle": "Portale: Elimina attore di trasformazione",
+            "Title": "Portale: genera creature",
+            "TransformTitle": "Portale: scegli una creatura in cui trasformarti"
+        },
+        "INFO": {
+            "RevertedTransformation": "Portale: trasformazione annullata"
         }
     }
 }

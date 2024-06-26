@@ -7,7 +7,18 @@
             "InvalidTexture": "Portal: Textura no válida",
             "NoTeleportTarget": "Portal: Sin objetivo de teletransporte",
             "NoTokenData": "Portal: Sin datos de token",
-            "OutOfRange": "Portal: fuera de alcance, elija una nueva ubicación"
+            "OutOfRange": "Portal: fuera de alcance, elija una nueva ubicación",
+            "InvalidTransformCreature": "Portal: criatura transformada no válida",
+            "InvalidTransformTarget": "Portal: destino de transformación no válido"
+        },
+        "DIALOG": {
+            "DeleteContent": "El actor de transformación ya no es necesario y se puede eliminar. \n¿Proceder?",
+            "DeleteTitle": "Portal: Eliminar actor de transformación",
+            "Title": "Portal: Generar criaturas",
+            "TransformTitle": "Portal: Elige una criatura para transformarte."
+        },
+        "INFO": {
+            "RevertedTransformation": "Portal: transformación revertida"
         }
     }
 }

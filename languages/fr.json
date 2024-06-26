@@ -7,7 +7,18 @@
             "InvalidTexture": "Portail : texture invalide",
             "NoTeleportTarget": "Portail : Pas de cible de téléportation",
             "NoTokenData": "Portail : aucune donnée de jeton",
-            "OutOfRange": "Portail : Hors de portée, veuillez choisir un nouvel emplacement"
+            "OutOfRange": "Portail : Hors de portée, veuillez choisir un nouvel emplacement",
+            "InvalidTransformCreature": "Portail : Créature transformée invalide",
+            "InvalidTransformTarget": "Portail : cible de transformation non valide"
+        },
+        "DIALOG": {
+            "DeleteContent": "L'acteur de transformation n'est plus nécessaire et peut être supprimé. \nProcéder?",
+            "DeleteTitle": "Portail : Supprimer l'acteur de transformation",
+            "Title": "Portail : créatures d'apparition",
+            "TransformTitle": "Portail : choisissez une créature vers laquelle vous transformer"
+        },
+        "INFO": {
+            "RevertedTransformation": "Portail : transformation inversée"
         }
     }
 }

@@ -7,7 +7,18 @@
             "InvalidTexture": "ポータル: 無効なテクスチャ",
             "NoTeleportTarget": "ポータル: テレポート ターゲットがありません",
             "NoTokenData": "ポータル: トークン データなし",
-            "OutOfRange": "ポータル: 範囲外です。新しい場所を選択してください"
+            "OutOfRange": "ポータル: 範囲外です。新しい場所を選択してください",
+            "InvalidTransformCreature": "ポータル: 無効な変身クリーチャー",
+            "InvalidTransformTarget": "ポータル: 無効な変換ターゲット"
+        },
+        "DIALOG": {
+            "DeleteContent": "変換アクターは不要になったので、削除できます。\n進む？",
+            "DeleteTitle": "ポータル: 変換アクターの削除",
+            "Title": "ポータル: クリーチャーのスポーン",
+            "TransformTitle": "ポータル: 変身するクリーチャーを選択してください"
+        },
+        "INFO": {
+            "RevertedTransformation": "ポータル: 変換を元に戻しました"
         }
     }
 }

@@ -7,7 +7,18 @@
             "InvalidTexture": "Portal: Ungültige Textur",
             "NoTeleportTarget": "Portal: Kein Teleportziel",
             "NoTokenData": "Portal: Keine Token-Daten",
-            "OutOfRange": "Portal: Außerhalb der Reichweite, bitte wählen Sie einen neuen Standort"
+            "OutOfRange": "Portal: Außerhalb der Reichweite, bitte wählen Sie einen neuen Standort",
+            "InvalidTransformCreature": "Portal: Ungültige Transformationskreatur",
+            "InvalidTransformTarget": "Portal: Ungültiges Transformationsziel"
+        },
+        "DIALOG": {
+            "DeleteContent": "Der Transformationsakteur wird nicht mehr benötigt und kann gelöscht werden. \nFortfahren?",
+            "DeleteTitle": "Portal: Transformationsakteur löschen",
+            "Title": "Portal: Kreaturen hervorbringen",
+            "TransformTitle": "Portal: Wähle eine Kreatur aus, in die du dich verwandeln möchtest"
+        },
+        "INFO": {
+            "RevertedTransformation": "Portal: Transformation rückgängig gemacht"
         }
     }
 }
