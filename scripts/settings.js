@@ -1,7 +1,16 @@
 import { MODULE_ID } from "./main.js";
 
 export function registerSettings() {
-    const settings = {};
+    const settings = {
+        "autoDelete": {
+            name: `${MODULE_ID}.settings.autoDelete.name`,
+            hint: `${MODULE_ID}.settings.autoDelete.hint`,
+            scope: "world",
+            config: true,
+            type: Boolean,
+            default: false,
+        },
+    };
 
     registerSettingsArray(settings);
 }

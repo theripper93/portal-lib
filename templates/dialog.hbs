@@ -5,7 +5,7 @@
             <img src="{{creature.token.texture.src}}" alt="">
             <span>{{creature.token.name}}</span>
         </div>
-        <input type="text" value="{{creature.count}}">
+        <input class="{{#if ../transform}}hidden{{/if}}" type="text" value="{{creature.count}}">
     </li>
     {{/each}}
 </ul>

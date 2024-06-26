@@ -1,6 +1,11 @@
 {
     "portal-lib": {
-        "settings": {},
+        "settings": {
+            "autoDelete": {
+                "name": "Auto Delete Transformation Actor",
+                "hint": "If enabled, the actor will be deleted without confirmation after the transformation is reverted."
+            }
+        },
         "app": {},
         "flags": {},
         "ERR": {

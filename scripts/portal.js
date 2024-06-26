@@ -2,6 +2,7 @@ import { Propagator } from "./lib/propagator.js";
 import { MODULE_ID } from "./main.js";
 import { TemplatePreview } from "./templatePreview.js";
 import { FormBuilder } from "./lib/formBuilder.js";
+import {getSetting} from "./settings.js";
 
 const DEFAULT_DATA = {
     origin: null,
@@ -286,10 +287,10 @@ export class Portal {
         return spawned;
     }
 
-    async dialog(options = { spawn: true, multipleChoice: false, title: `${MODULE_ID}.DIALOG.Title` }) {
+    async dialog(options = { spawn: true, multipleChoice: false, title: `${MODULE_ID}.DIALOG.Title`, transform: false }) {
         await this.#preValidateAndProcessData();
         const dialogData = this.#tokens.map((token, index) => ({ token, count: this.#counts[index], index }));
-        const html = await renderTemplate("modules/portal-lib/templates/dialog.hbs", { dialogData });
+        const html = await renderTemplate("modules/portal-lib/templates/dialog.hbs", { dialogData, transform: options.transform });
         let selectedLi = [];
         const result = await foundry.applications.api.DialogV2.prompt({
             window: { title: options.title },
@@ -423,7 +424,7 @@ export class Portal {
 
         if (this.#tokens.length === 0) return ui.notifications.error(`${MODULE_ID}.ERR.InvalidTransformCreature`, { localize: true });
 
-        if (this.#tokens.length > 1) await this.dialog({ spawn: false, multipleChoice: false, title: `${MODULE_ID}.DIALOG.TransformTitle` });
+        if (this.#tokens.length > 1) await this.dialog({ spawn: false, multipleChoice: false, title: `${MODULE_ID}.DIALOG.TransformTitle`, transform: true });
 
         const transformActor = this.#tokens[0].actor;
 
@@ -480,7 +481,8 @@ export class Portal {
         const currentSheetPosition = { top: tokenDocument.actor.sheet.position.top, left: tokenDocument.actor.sheet.position.left };
         tokenDocument.actor.sheet.close();
         const toDelete = await fromUuid(revertData.createdActor);
-        const confirmDelete = await foundry.applications.api.DialogV2.confirm({ position: { width: 400 }, window: { title: game.i18n.localize(`${MODULE_ID}.DIALOG.DeleteTitle`) }, content: game.i18n.localize(`${MODULE_ID}.DIALOG.DeleteContent`) + "<hr>" + `<strong>${toDelete.name}</strong>` });
+        const autoDelete = getSetting("autoDelete");
+        const confirmDelete = autoDelete || await foundry.applications.api.DialogV2.confirm({ position: { width: 400 }, window: { title: game.i18n.localize(`${MODULE_ID}.DIALOG.DeleteTitle`) }, content: game.i18n.localize(`${MODULE_ID}.DIALOG.DeleteContent`) + "<hr>" + `<strong>${toDelete.name}</strong>` });
         if (confirmDelete) toDelete.delete();
         const tokenData = revertData.tokenData;
         await tokenDocument.update(tokenData);
