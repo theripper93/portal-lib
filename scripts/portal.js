@@ -28,6 +28,12 @@ export class Portal {
 
     #validated = false;
 
+    #actorAttributes = [];
+
+    #tokenAttributes = [];
+
+    #transformTarget = null;
+
     get template() {
         return this.#template;
     }
@@ -46,6 +52,18 @@ export class Portal {
 
     get texture() {
         return this.#data.texture;
+    }
+
+    get actorAttributes() {
+        return this.#actorAttributes;
+    }
+
+    get tokenAttributes() {
+        return this.#tokenAttributes;
+    }
+
+    get transformTarget() {
+        return this.#transformTarget;
     }
 
     addCreature(creature, { updateData = null, count = 1 } = {}) {
@@ -72,6 +90,11 @@ export class Portal {
     origin(origin) {
         if (origin instanceof Token || origin instanceof TokenDocument) {
             this.#data.teleportTarget = origin.document ?? origin;
+            this.#transformTarget = origin.document ?? origin;
+        } else if (origin instanceof Actor) {
+            this.#transformTarget = origin;
+        } else if (typeof target === "string") {
+            this.#transformTarget = game.actors.getName(origin) ?? fromUuidSync(origin) ?? origin;
         }
 
         if (!origin || !Number.isFinite(origin.x) || !Number.isFinite(origin.y)) {
@@ -158,7 +181,6 @@ export class Portal {
         this.#validated = true;
         await this.#resolveTokenData();
         if (!Number.isFinite(this.#data.distance)) {
-            console.log(this.#tokens);
             const firstToken = this.#tokens[0] ?? this.#data.teleportTarget;
             const size = firstToken ? Math.max(firstToken.width, firstToken.height) : 1;
             this.#data.distance = size * canvas.scene.dimensions.distance;
@@ -331,7 +353,7 @@ export class Portal {
             //calc offset
             const maxSize = Math.max(targetToken.width, targetToken.height);
             const offsetMulti = Math.floor(maxSize / 2);
-            const offset = {x: -canvas.grid.size * offsetMulti, y: -canvas.grid.size * offsetMulti};
+            const offset = { x: -canvas.grid.size * offsetMulti, y: -canvas.grid.size * offsetMulti };
             position.x += offset.x;
             position.y += offset.y;
         }
@@ -376,5 +398,93 @@ export class Portal {
         const portal = new Portal();
         portal.addCreature(options);
         return await portal.spawn();
+    }
+
+    // Transformation Logic
+
+    addActorAttribute(attribute) {
+        this.#actorAttributes.push(attribute);
+        return this;
+    }
+
+    addTokenAttribute(attribute) {
+        this.#tokenAttributes.push(attribute);
+        return this;
+    }
+
+    async transform(options = {}) {
+        await this.#preValidateAndProcessData();
+        const original = typeof this.#transformTarget === "string" ? await fromUuid(this.#transformTarget) : this.#transformTarget;
+        if (!original) return ui.notifications.error(`${MODULE_ID}.ERR.InvalidTransformTarget`, { localize: true });
+        const actor = original instanceof Actor ? original : original.actor;
+        if (!actor) return ui.notifications.error(`${MODULE_ID}.ERR.InvalidTransformTarget`, { localize: true });
+
+        if (this.#tokens.length === 0) return ui.notifications.error(`${MODULE_ID}.ERR.InvalidTransformCreature`, { localize: true });
+
+        if (this.#tokens.length > 1) await this.dialog({ spawn: false, multipleChoice: false });
+
+        const transformActor = this.#tokens[0].actor;
+
+        if (!transformActor) return ui.notifications.error(`${MODULE_ID}.ERR.InvalidTransformCreature`, { localize: true });
+
+        const transformedActorData = transformActor.toObject();
+
+        for (const attribute of this.#actorAttributes) {
+            const value = foundry.utils.getProperty(original, attribute);
+            if (value) foundry.utils.setProperty(transformedActorData, attribute, value);
+        }
+
+        let originalToken = actor.token ?? actor.getActiveTokens()[0] ?? actor.prototypeToken;
+        originalToken = originalToken.document ?? originalToken;
+
+        // Check if it's already a transformed actor
+        const isTransformed = originalToken.getFlag(MODULE_ID, "revertData");
+        if (isTransformed) return Portal.revertTransformation(originalToken);
+
+        for (const attribute of this.#tokenAttributes) {
+            const value = foundry.utils.getProperty(originalToken, attribute);
+            if (value) foundry.utils.setProperty(transformedActorData.prototypeToken, attribute, value);
+        }
+
+        transformedActorData.name = transformedActorData.name + ` - [${original.name}]`;
+
+        const existing = game.actors.getName(transformedActorData.name);
+
+        const transformedActor = existing ?? await Actor.create(transformedActorData);
+
+        const currentSheetPosition = {top: actor.sheet.position.top, left: actor.sheet.position.left};
+
+        const revertData = {
+            tokenData: originalToken.toObject(),
+            createdActor: transformedActor.uuid,
+            time: Date.now(),
+        }
+
+        //assign actor to new token
+        const originalCanvasToken = actor.token ?? actor.getActiveTokens()[0];
+        if (originalCanvasToken) {
+            await originalCanvasToken.document.update({...transformedActorData.prototypeToken, actorId: transformedActor.id, flags: {[MODULE_ID]: {revertData}}});
+        }
+
+        originalCanvasToken.actor.sheet.render(true, {...currentSheetPosition});
+
+        return transformedActor;
+    }
+
+    static async revertTransformation(token) {
+        const tokenDocument = token.document ?? token;
+        const revertData = tokenDocument.getFlag(MODULE_ID, "revertData");
+        if (!revertData) return;
+        const currentSheetPosition = {top: tokenDocument.actor.sheet.position.top, left: tokenDocument.actor.sheet.position.left};
+        tokenDocument.actor.sheet.close();
+        const toDelete = await fromUuid(revertData.createdActor);
+        const confirmDelete = await foundry.applications.api.DialogV2.confirm({position: {width: 400}, window: { title: game.i18n.localize(`${MODULE_ID}.DIALOG.DeleteTitle`)}, content: game.i18n.localize(`${MODULE_ID}.DIALOG.DeleteContent`) + "<hr>" + `<strong>${toDelete.name}</strong>`});
+        if(confirmDelete) toDelete.delete();
+        const tokenData = revertData.tokenData;
+        await tokenDocument.update(tokenData);
+        await tokenDocument.unsetFlag(MODULE_ID, "revertData");
+        tokenDocument.actor.sheet.render(true, {...currentSheetPosition});
+        ui.notifications.info(`${MODULE_ID}.INFO.RevertedTransformation`, { localize: true })
+        return tokenDocument;
     }
 }

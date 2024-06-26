@@ -8,12 +8,19 @@
             "InvalidTexture": "Portal: Invalid texture",
             "InvalidNumber": "Portal: Invalid number",
             "InvalidColor": "Portal: Invalid color",
+            "InvalidTransformTarget": "Portal: Invalid transform target",
+            "InvalidTransformCreature": "Portal: Invalid transform creature",
             "NoTokenData": "Portal: No token data",
             "NoTeleportTarget": "Portal: No teleport target",
             "OutOfRange": "Portal: Out of range, please pick a new location"
         },
+        "INFO": {
+            "RevertedTransformation": "Portal: Reverted transformation"
+        },
         "DIALOG": {
-            "Title": "Portal: Spawn Creatures"
+            "Title": "Portal: Spawn Creatures",
+            "DeleteTitle": "Portal: Delete Transformation Actor",
+            "DeleteContent": "The transformation actor is no longer needed and can be deleted. Proceed?"
         }
     }
 }

@@ -10,3 +10,18 @@ Hooks.on("init", () => {
     initConfig();
     registerSettings();
 });
+
+Hooks.on("getActorSheetHeaderButtons", (app, buttons) => {
+    console.log("getActorSheetHeaderButtons")
+    const actor = app.document ?? app.actor;
+    const canRevert = actor.token?.flags[MODULE_ID]?.revertData;
+    if(!canRevert) return;
+    buttons.unshift({
+        label: "Revert Transformation",
+        class: "revert",
+        icon: "fas fa-undo",
+        onclick: () => {
+            Portal.revertTransformation(actor.token);
+        }
+    });
+});
