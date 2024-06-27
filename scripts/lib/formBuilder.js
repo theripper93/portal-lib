@@ -1,4 +1,6 @@
-import { MODULE_ID } from "../main.js";
+import {MODULE_ID} from "../main.js";
+
+const PARTIAL_KEY = "6uy8g1tXqHlhlp65dhiL-genericFormHelper-" + MODULE_ID;
 
 export class FormBuilder {
     constructor() {
@@ -41,7 +43,8 @@ export class FormBuilder {
     getHTML() {
         const app = this.form();
         const data = app._prepareContext();
-        return renderTemplate("modules/portal-lib/templates/genericForm.hbs", data);
+        FormHelper.registerPartial();
+        return renderTemplate(PARTIAL_KEY, data);
     }
 
     getAsClass(options) {
@@ -362,7 +365,7 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
         const actions = {};
         data.buttons.forEach((b) => (actions[b.action] = b.callback));
         super({actions, ...data.options});
-        this.registerPartial();
+        FormHelper.registerPartial();
         this.menu = data.settingsMenu;
         this.resolve;
         this.reject;
@@ -402,18 +405,17 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
             template: "templates/generic/tab-navigation.hbs",
         },
         genericForm: {
-            template: "6uy8g1tXqHlhlp65dhiL-genericFormHelper",
+            template: PARTIAL_KEY,
         },
         footer: {
             template: "templates/generic/form-footer.hbs",
         },
     };
 
-    registerPartial() {
-        const key = "6uy8g1tXqHlhlp65dhiL-genericFormHelper";
-        if(Handlebars.partials[key]) return;
+    static registerPartial() {
+        if(Handlebars.partials[PARTIAL_KEY]) return;
         const compiledTemplate = Handlebars.compile(GENERIC_FORM_HBS);
-        Handlebars.registerPartial(key, compiledTemplate);
+        Handlebars.registerPartial(PARTIAL_KEY, compiledTemplate);
     }
 
     processFormStructure(data) {
@@ -510,7 +512,6 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
         if(this.menu) return game.settings.set(this.menu.moduleId, this.menu.key, data);
     }
 }
-
 
 const GENERIC_FORM_HBS = `<div>
     {{#if info}}{{{info}}}{{/if}}
