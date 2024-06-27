@@ -361,7 +361,8 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
     constructor (data) {
         const actions = {};
         data.buttons.forEach((b) => (actions[b.action] = b.callback));
-        super({ actions, ...data.options });
+        super({actions, ...data.options});
+        this.registerPartial();
         this.menu = data.settingsMenu;
         this.resolve;
         this.reject;
@@ -401,12 +402,19 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
             template: "templates/generic/tab-navigation.hbs",
         },
         genericForm: {
-            template: "modules/portal-lib/templates/genericForm.hbs",
+            template: "6uy8g1tXqHlhlp65dhiL-genericFormHelper",
         },
         footer: {
             template: "templates/generic/form-footer.hbs",
         },
     };
+
+    registerPartial() {
+        const key = "6uy8g1tXqHlhlp65dhiL-genericFormHelper";
+        if(Handlebars.partials[key]) return;
+        const compiledTemplate = Handlebars.compile(GENERIC_FORM_HBS);
+        Handlebars.registerPartial(key, compiledTemplate);
+    }
 
     processFormStructure(data) {
 
@@ -502,3 +510,43 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
         if(this.menu) return game.settings.set(this.menu.moduleId, this.menu.key, data);
     }
 }
+
+
+const GENERIC_FORM_HBS = `<div>
+    {{#if info}}{{{info}}}{{/if}}
+    {{#each tabs as |tab|}}
+
+    <section class="tab standard-form scrollable {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
+        {{#each tab.fields as |field|}}
+        {{#if field.fieldset}}
+        <fieldset>
+            <legend>{{localize field.legend}}</legend>
+            {{#each field.fields as |f|}}
+            {{formField f.field stacked=f.stacked type=f.type label=f.label hint=f.hint name=f.name value=f.value min=f.min max=f.max
+            step=f.step localize=true}}
+            {{/each}}
+        </fieldset>
+        {{else}}
+        {{formField field.field stacked=field.stacked type=field.type label=field.label hint=field.hint name=field.name value=field.value
+        min=field.min max=field.max step=field.step localize=true}}
+        {{/if}}
+        {{/each}}
+    </section>
+
+    {{/each}}
+
+    {{#each fields as |field|}}
+    {{#if field.fieldset}}
+    <fieldset>
+        <legend>{{localize field.legend}}</legend>
+        {{#each field.fields as |f|}}
+        {{formField f.field stacked=f.stacked type=f.type label=f.label hint=f.hint name=f.name value=f.value min=f.min max=f.max step=f.step
+        localize=true}}
+        {{/each}}
+    </fieldset>
+    {{else}}
+    {{formField field.field stacked=field.stacked type=field.type label=field.label hint=field.hint name=field.name value=field.value
+    min=field.min max=field.max step=field.step localize=true}}
+    {{/if}}
+    {{/each}}
+</div>`
