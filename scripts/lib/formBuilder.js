@@ -64,6 +64,8 @@ export class FormBuilder {
         key ??= "settings";
         icon ??= "fas fa-cogs";
         label ??= "Configure";
+        title ??= "Configuration Menu";
+        hint ??= "Configure the module settings";
 
         const menuOptions = {
             settingsMenu: {
