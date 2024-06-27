@@ -1,3 +1,5 @@
+import { MODULE_ID } from "../main.js";
+
 export class FormBuilder {
     constructor() {
         this.submitButton();
@@ -17,6 +19,11 @@ export class FormBuilder {
     #currentTab = null;
     #currentFieldset = null;
     #object = null;
+    #app = null;
+
+    get app() {
+        return this.#app;
+    }
 
     async render() {
         const app = this.form();
@@ -25,7 +32,9 @@ export class FormBuilder {
     }
 
     form() {
-        const app = new FormHelper({ tabs: this.#tabs, fields: this.#fields, buttons: this.#buttons, options: this.#options });
+        if (this.#app) return this.#app;
+        const app = new FormHelper({tabs: this.#tabs, fields: this.#fields, buttons: this.#buttons, options: this.#options});
+        this.#app = app;
         return app;
     }
 
@@ -33,6 +42,58 @@ export class FormBuilder {
         const app = this.form();
         const data = app._prepareContext();
         return renderTemplate("modules/portal-lib/templates/genericForm.hbs", data);
+    }
+
+    getAsClass(options) {
+
+        const classData = {...options, tabs: this.#tabs, fields: this.#fields, buttons: this.#buttons, options: this.#options};
+
+        return class extends FormHelper {
+            constructor(data = {}) {
+                super({...classData, ...data});
+            }
+        }
+    }
+
+    registerAsMenu({moduleId, key, name, label, icon, hint, scope, restricted, defaultValue, onChange, requiresReload} = {}) {
+        
+        moduleId ??= MODULE_ID;
+        scope ??= "world";
+        restricted ??= true;
+        defaultValue ??= {};
+        key ??= "settings";
+        icon ??= "fas fa-cogs";
+        label ??= "Configure";
+
+        const menuOptions = {
+            settingsMenu: {
+                requiresReload,
+                onChange,
+                moduleId,
+                key
+            }
+        }
+
+        const cls = this.getAsClass(menuOptions);
+
+        game.settings.registerMenu(moduleId, key+"-menu", {
+            name,
+            label,
+            hint,
+            icon,
+            scope,
+            restricted,
+            type: cls,
+        });
+
+        game.settings.register(moduleId, key, {
+            scope,
+            config: false,
+            default: defaultValue,
+            type: Object,
+            onChange,
+            requiresReload,
+        });
     }
 
     async insertHTML(element, selector, insertion = "afterend") {
@@ -295,11 +356,11 @@ function inferSelectDataType(options) {
 }
 
 export class FormHelper extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2) {
-    constructor(data) {
-        data = data ?? testData;
+    constructor (data) {
         const actions = {};
         data.buttons.forEach((b) => (actions[b.action] = b.callback));
         super({ actions, ...data.options });
+        this.menu = data.settingsMenu;
         this.resolve;
         this.reject;
         this.promise = new Promise((resolve, reject) => {
@@ -346,6 +407,11 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
     };
 
     processFormStructure(data) {
+
+        const currentSetting = this.menu ? game.settings.get(this.menu.moduleId, this.menu.key) : {};
+        const isMenu = !!this.menu;
+
+
         if (data.tabs?.length) {
             this.__tabs = {};
             const active = data.tabs.find((t) => t.active);
@@ -359,10 +425,27 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
                     active: tab.active ?? false,
                     fields: tab.fields ?? [],
                 };
+
+                if (isMenu) {
+                    const fields = tab.fields ?? [];
+                    for (const field of fields) {
+                        const settingValue = foundry.utils.getProperty(currentSetting, field.name);
+                        if (settingValue !== undefined) field.value = settingValue;
+                    }
+                }
+            }
+        }
+
+        if (isMenu) {
+            const fields = data.fields ?? [];
+            for (const field of fields) {
+                const settingValue = foundry.utils.getProperty(currentSetting, field.name);
+                if (settingValue !== undefined) field.value = settingValue;
             }
         }
 
         this.#fields = data.fields ?? [];
+
 
         this.#buttons = data.buttons ?? [];
     }
@@ -414,5 +497,6 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
     static async #onSubmit(event, form, formData) {
         const data = foundry.utils.expandObject(formData.object);
         this.resolve(data);
+        if(this.menu) return game.settings.set(this.menu.moduleId, this.menu.key, data);
     }
 }
