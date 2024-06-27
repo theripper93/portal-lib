@@ -99,6 +99,11 @@ export class FormBuilder {
             onChange,
             requiresReload,
         });
+
+        return {
+            getSetting: () => game.settings.get(moduleId, key),
+            setSetting: (value) => game.settings.set(moduleId, key, value),
+        }
     }
 
     async insertHTML(element, selector, insertion = "afterend") {
@@ -509,7 +514,11 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
     static async #onSubmit(event, form, formData) {
         const data = foundry.utils.expandObject(formData.object);
         this.resolve(data);
-        if(this.menu) return game.settings.set(this.menu.moduleId, this.menu.key, data);
+        if (this.menu) {
+            if (this.menu.requiresReload) SettingsConfig.reloadConfirm();
+            if (this.menu.onChange) this.menu.onChange(data);
+            return game.settings.set(this.menu.moduleId, this.menu.key, data);
+        }
     }
 }
 
