@@ -466,7 +466,7 @@ export class Portal {
         //assign actor to new token
         const originalCanvasToken = actor.token ?? actor.getActiveTokens()[0];
         if (originalCanvasToken) {
-            await originalCanvasToken.document.update({ ...transformedActorData.prototypeToken, actorId: transformedActor.id, flags: { [MODULE_ID]: { revertData } } });
+            await (originalCanvasToken.document ?? originalCanvasToken).update({ ...transformedActorData.prototypeToken, actorId: transformedActor.id, flags: { [MODULE_ID]: { revertData } } });
         }
 
         originalCanvasToken.actor.sheet.render(true, { ...currentSheetPosition });
