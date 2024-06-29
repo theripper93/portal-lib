@@ -16,11 +16,11 @@ export class Router {
 
     static async updateDocument(uuid, data, options = {}) {
         uuid = this.#getUUID(uuid);
-        if(this.#enableRouter) {
+        const document = await fromUuid(uuid);
+        if(this.#enableRouter && !document.isOwner) {
             const res = await this.#Socket.updateDocument({uuid, data, options});
             return res[0].response;
         } else {
-            const document = await fromUuid(uuid);
             return await document.update(data, options);
         }
     }
@@ -38,7 +38,9 @@ export class Router {
 
     static async updateDocuments(uuid, documentType, data, options = {}) {
         uuid = this.#getUUID(uuid);
-        if(this.#enableRouter) {
+        const parent = await fromUuid(uuid);
+
+        if(this.#enableRouter && !parent.isOwner) {
             const res = await this.#Socket.updateDocuments({uuid, documentType, data, options});
             const documents = [];
             for(const d of res[0].response) {
@@ -46,13 +48,12 @@ export class Router {
             }
             return documents;
         } else {
-            const parent = await fromUuid(uuid);
             return await parent.updateEmbeddedDocuments(documentType, data, options);
         }
     }
 
     static async createActor(data) {
-        if(this.#enableRouter) {
+        if(this.#enableRouter && !game.user.hasPermission("ACTOR_CREATE")) {
             const res = await this.#Socket.createActor({data});
             const actor = res[0].response;
             return await fromUuid(actor);
@@ -63,7 +64,7 @@ export class Router {
 
     static async createEmbeddedDocuments(parent, documentType, data, options = {}) {
         parent = this.#getUUID(parent);
-        if(this.#enableRouter) {
+        if(this.#enableRouter && !game.user.hasPermission("TOKEN_CREATE")) {
             const res = await this.#Socket.createEmbeddedDocuments({parent, documentType, data, options});
             const documents = [];
             for(const d of res[0].response) {
