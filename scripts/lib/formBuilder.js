@@ -120,7 +120,7 @@ export class FormBuilder {
     }
 
     #addField(field) {
-        if (this.#object) {
+        if (this.#object && field.name) {
             const objectValue = foundry.utils.getProperty(this.#object, field.name);
             if (objectValue !== undefined) field.value = objectValue;
         }
@@ -203,6 +203,14 @@ export class FormBuilder {
         };
         this.#addField(fieldset);
         this.#currentFieldset = fieldset;
+        return this;
+    }
+
+    html(html){
+        const field = {
+            html,
+        };
+        this.#addField(field);
         return this;
     }
 
@@ -522,41 +530,36 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
     }
 }
 
+const FIELD_INNER_HBS = `
+    {{#if field.fieldset}}
+    <fieldset>
+        <legend>{{localize field.legend}}</legend>
+        {{#each field.fields as |f|}}
+        {{#if f.html}}{{{f.html}}}{{else}}
+        {{formField f.field stacked=f.stacked type=f.type label=f.label hint=f.hint name=f.name value=f.value min=f.min max=f.max step=f.step localize=true}}
+        {{/if}}
+        {{/each}}
+    </fieldset>
+    {{else}}
+    {{#if field.html}}{{{field.html}}}{{else}}
+    {{formField field.field stacked=field.stacked type=field.type label=field.label hint=field.hint name=field.name value=field.value min=field.min max=field.max step=field.step localize=true}}
+    {{/if}}
+    {{/if}}
+        `
+
 const GENERIC_FORM_HBS = `<div>
     {{#if info}}{{{info}}}{{/if}}
     {{#each tabs as |tab|}}
 
     <section class="tab standard-form scrollable {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
         {{#each tab.fields as |field|}}
-        {{#if field.fieldset}}
-        <fieldset>
-            <legend>{{localize field.legend}}</legend>
-            {{#each field.fields as |f|}}
-            {{formField f.field stacked=f.stacked type=f.type label=f.label hint=f.hint name=f.name value=f.value min=f.min max=f.max
-            step=f.step localize=true}}
-            {{/each}}
-        </fieldset>
-        {{else}}
-        {{formField field.field stacked=field.stacked type=field.type label=field.label hint=field.hint name=field.name value=field.value
-        min=field.min max=field.max step=field.step localize=true}}
-        {{/if}}
+        ${FIELD_INNER_HBS}
         {{/each}}
     </section>
 
     {{/each}}
 
     {{#each fields as |field|}}
-    {{#if field.fieldset}}
-    <fieldset>
-        <legend>{{localize field.legend}}</legend>
-        {{#each field.fields as |f|}}
-        {{formField f.field stacked=f.stacked type=f.type label=f.label hint=f.hint name=f.name value=f.value min=f.min max=f.max step=f.step
-        localize=true}}
-        {{/each}}
-    </fieldset>
-    {{else}}
-    {{formField field.field stacked=field.stacked type=field.type label=field.label hint=field.hint name=field.name value=field.value
-    min=field.min max=field.max step=field.step localize=true}}
-    {{/if}}
+    ${FIELD_INNER_HBS}
     {{/each}}
 </div>`

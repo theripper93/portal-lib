@@ -17,6 +17,8 @@ export class Portal {
 
     static FormBuilder = FormBuilder;
 
+    static sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
     #data;
 
     #tokens = [];
@@ -34,6 +36,8 @@ export class Portal {
     #tokenAttributes = [];
 
     #transformTarget = null;
+
+    #delay = 0;
 
     get template() {
         return this.#template;
@@ -127,6 +131,11 @@ export class Portal {
         return this;
     }
 
+    delay(ms) {
+        this.#delay = ms;
+        return this;
+    }
+
     color(color) {
         this.#data.color = color;
         return this;
@@ -146,6 +155,17 @@ export class Portal {
             this.#data.texture = texture;
         } else {
             ui.notifications.error(`${MODULE_ID}.ERR.InvalidTexture`, { localize: true });
+        }
+        return this;
+    }
+
+    setLocation(templateDocument) {
+        templateDocument = templateDocument.document ?? templateDocument;
+        if(templateDocument instanceof MeasuredTemplateDocument) {
+            this.#template = templateDocument;
+        } else {
+            templateDocument = new MeasuredTemplateDocument(templateDocument);
+            this.#template = templateDocument;
         }
         return this;
     }
@@ -267,6 +287,8 @@ export class Portal {
         } else {
             position = { x: this.#template.x, y: this.#template.y, elevation: this.#template.elevation ?? 0 };
         }
+
+        if(this.#delay) await Portal.sleep(this.#delay);
 
         const spawned = [];
 
