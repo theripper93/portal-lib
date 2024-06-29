@@ -19,6 +19,16 @@
         },
         "INFO": {
             "RevertedTransformation": "Portal: transformação revertida"
+        },
+        "settings": {
+            "autoDelete": {
+                "hint": "Se habilitado, o ator será excluído sem confirmação após a reversão da transformação.",
+                "name": "Ator de transformação de exclusão automática"
+            },
+            "enableRouter": {
+                "hint": "Se ativado, usuários não GM poderão usar o Portal Router, que permite a execução de scripts para atualizar documentos sem propriedade. \nIMPORTANTE: Um usuário malicioso ou inexperiente pode usar isso para prejudicar ou danificar o conteúdo do seu mundo. \nCertifique-se de usar isso apenas com jogadores em quem você confia.",
+                "name": "Habilitar roteador"
+            }
         }
     }
 }

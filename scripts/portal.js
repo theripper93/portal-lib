@@ -3,6 +3,7 @@ import { MODULE_ID } from "./main.js";
 import { TemplatePreview } from "./templatePreview.js";
 import { FormBuilder } from "./lib/formBuilder.js";
 import {getSetting} from "./settings.js";
+import {Router} from "./router.js";
 
 const DEFAULT_DATA = {
     origin: null,
@@ -214,7 +215,7 @@ export class Portal {
         if (!updateData) return;
         const actor = tokenDocument.actor;
         if (!actor) return;
-        if (updateData.actor) await tokenDocument.actor.update(updateData.actor);
+        if (updateData.actor) await Router.updateDocument(tokenDocument.actor, updateData.actor);
         if (updateData.embedded) {
             for (const [key, value] of Object.entries(updateData.embedded)) {
                 const collection = actor.getEmbeddedCollection(key);
@@ -229,7 +230,7 @@ export class Portal {
                         });
                     }
                 });
-                await collection.update(updates);
+                await Router.updateDocuments(actor, key, updates);
             }
         }
     }
@@ -300,7 +301,7 @@ export class Portal {
             for (let i = 0; i < count; i++) {
                 const tPos = Propagator.getFreePosition(tokenDocument, offsetPosition, true);
                 tokenDocument.updateSource({ x: tPos.x, y: tPos.y, elevation: offsetPosition.elevation });
-                const token = (await canvas.scene.createEmbeddedDocuments("Token", [tokenDocument]))[0];
+                const token = (await Router.createEmbeddedDocuments(canvas.scene, "Token", [tokenDocument]))[0];
                 await this.#processPostSpawnUpdate(token, this.#updateData[ti]);
                 spawned.push(token);
             }
@@ -399,7 +400,7 @@ export class Portal {
             },
         );
 
-        await targetToken.update({ x: position.x, y: position.y, elevation: position.elevation }, { animate: false });
+        await Router.updateDocument(targetToken, { x: position.x, y: position.y, elevation: position.elevation }, { animate: false });
 
         //fade in token
         await CanvasAnimation.animate(
@@ -454,6 +455,8 @@ export class Portal {
 
         const transformedActorData = transformActor.toObject();
 
+        foundry.utils.setProperty(transformedActorData, `ownership.${game.user.id}`, CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER);
+
         for (const attribute of this.#actorAttributes) {
             const value = foundry.utils.getProperty(original, attribute);
             if (value) foundry.utils.setProperty(transformedActorData, attribute, value);
@@ -475,7 +478,7 @@ export class Portal {
 
         const existing = game.actors.getName(transformedActorData.name);
 
-        const transformedActor = existing ?? (await Actor.create(transformedActorData));
+        const transformedActor = existing ?? (await Router.createActor(transformedActorData));
 
         const currentSheetPosition = { top: actor.sheet.position.top, left: actor.sheet.position.left };
 
@@ -488,7 +491,7 @@ export class Portal {
         //assign actor to new token
         const originalCanvasToken = actor.token ?? actor.getActiveTokens()[0];
         if (originalCanvasToken) {
-            await (originalCanvasToken.document ?? originalCanvasToken).update({ ...transformedActorData.prototypeToken, actorId: transformedActor.id, flags: { [MODULE_ID]: { revertData } } });
+            await Router.updateDocument(originalCanvasToken.document ?? originalCanvasToken, { ...transformedActorData.prototypeToken, actorId: transformedActor.id, flags: { [MODULE_ID]: { revertData } } });
         }
 
         originalCanvasToken.actor.sheet.render(true, { ...currentSheetPosition });
@@ -505,10 +508,10 @@ export class Portal {
         const toDelete = await fromUuid(revertData.createdActor);
         const autoDelete = getSetting("autoDelete");
         const confirmDelete = autoDelete || await foundry.applications.api.DialogV2.confirm({ position: { width: 400 }, window: { title: game.i18n.localize(`${MODULE_ID}.DIALOG.DeleteTitle`) }, content: game.i18n.localize(`${MODULE_ID}.DIALOG.DeleteContent`) + "<hr>" + `<strong>${toDelete.name}</strong>` });
-        if (confirmDelete) toDelete.delete();
+        if (confirmDelete) await Router.deleteDocument(toDelete);
         const tokenData = revertData.tokenData;
-        await tokenDocument.update(tokenData);
-        await tokenDocument.unsetFlag(MODULE_ID, "revertData");
+        foundry.utils.setProperty(tokenData, "flags." + MODULE_ID + ".revertData", null);
+        await Router.updateDocument(tokenDocument, tokenData);
         tokenDocument.actor.sheet.render(true, { ...currentSheetPosition });
         ui.notifications.info(`${MODULE_ID}.INFO.RevertedTransformation`, { localize: true });
         return tokenDocument;

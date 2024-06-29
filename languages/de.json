@@ -19,6 +19,16 @@
         },
         "INFO": {
             "RevertedTransformation": "Portal: Transformation rückgängig gemacht"
+        },
+        "settings": {
+            "autoDelete": {
+                "hint": "Wenn diese Option aktiviert ist, wird der Akteur ohne Bestätigung gelöscht, nachdem die Transformation rückgängig gemacht wurde.",
+                "name": "Transformationsakteur automatisch löschen"
+            },
+            "enableRouter": {
+                "hint": "Wenn diese Option aktiviert ist, können Nicht-GM-Benutzer den Portal-Router verwenden, der die Skriptausführung zum Aktualisieren nicht besessener Dokumente ermöglicht. \nWICHTIG: Ein böswilliger oder unerfahrener Benutzer könnte dies nutzen, um den Inhalt Ihrer Welt zu beschädigen oder zu beschädigen. \nStellen Sie sicher, dass Sie dies nur bei Spielern verwenden, denen Sie vertrauen.",
+                "name": "Router aktivieren"
+            }
         }
     }
 }

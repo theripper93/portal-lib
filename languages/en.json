@@ -4,6 +4,10 @@
             "autoDelete": {
                 "name": "Auto Delete Transformation Actor",
                 "hint": "If enabled, the actor will be deleted without confirmation after the transformation is reverted."
+            },
+            "enableRouter": {
+                "name": "Enable Router",
+                "hint": "If enabled, non-gm users will be able to use the Portal Router which allows script execution to update unowned documents. IMPORTANT: A Malicious or Inexperienced user could use this to grief or damage the contents of your world. Make sure you only use this with players you trust."
             }
         },
         "app": {},

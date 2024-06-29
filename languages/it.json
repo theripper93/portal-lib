@@ -19,6 +19,16 @@
         },
         "INFO": {
             "RevertedTransformation": "Portale: trasformazione annullata"
+        },
+        "settings": {
+            "autoDelete": {
+                "hint": "Se abilitato, l'attore verrà eliminato senza conferma una volta annullata la trasformazione.",
+                "name": "Elimina automaticamente l'attore di trasformazione"
+            },
+            "enableRouter": {
+                "hint": "Se abilitato, gli utenti non GM potranno utilizzare il Portal Router che consente l'esecuzione di script per aggiornare i documenti senza proprietario. \nIMPORTANTE: un utente malintenzionato o inesperto potrebbe usarlo per affliggere o danneggiare i contenuti del tuo mondo. \nAssicurati di usarlo solo con giocatori di cui ti fidi.",
+                "name": "Abilita router"
+            }
         }
     }
 }
