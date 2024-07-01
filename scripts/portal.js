@@ -371,18 +371,16 @@ export class Portal {
         }
         await this.#preValidateAndProcessData();
         let position;
-        if (!this.#template) {
-            const picked = await this.pick({});
-            if (!picked) return false;
-            const gridAligned = canvas.grid.getTopLeftPoint(picked);
-            position = gridAligned;
-            //calc offset
-            const maxSize = Math.max(targetToken.width, targetToken.height);
-            const offsetMulti = Math.floor(maxSize / 2);
-            const offset = { x: -canvas.grid.size * offsetMulti, y: -canvas.grid.size * offsetMulti };
-            position.x += offset.x;
-            position.y += offset.y;
-        }
+        const picked = this.#template ?? await this.pick({});
+        if (!picked) return false;
+        const gridAligned = canvas.grid.getTopLeftPoint(picked);
+        position = gridAligned;
+        //calc offset
+        const maxSize = Math.max(targetToken.width, targetToken.height);
+        const offsetMulti = Math.floor(maxSize / 2);
+        const offset = { x: -canvas.grid.size * offsetMulti, y: -canvas.grid.size * offsetMulti };
+        position.x += offset.x;
+        position.y += offset.y;
         //fade out token
         const placeable = targetToken.object;
         const originalAlpha = placeable.mesh.alpha;
