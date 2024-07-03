@@ -2,8 +2,8 @@ import { Propagator } from "./lib/propagator.js";
 import { MODULE_ID } from "./main.js";
 import { TemplatePreview } from "./templatePreview.js";
 import { FormBuilder } from "./lib/formBuilder.js";
-import {getSetting} from "./settings.js";
-import {Router} from "./router.js";
+import { getSetting } from "./settings.js";
+import { Router } from "./router.js";
 
 const DEFAULT_DATA = {
     origin: null,
@@ -162,7 +162,7 @@ export class Portal {
 
     setLocation(templateDocument) {
         templateDocument = templateDocument.document ?? templateDocument;
-        if(templateDocument instanceof MeasuredTemplateDocument) {
+        if (templateDocument instanceof MeasuredTemplateDocument) {
             this.#template = templateDocument;
         } else {
             templateDocument = new MeasuredTemplateDocument(templateDocument);
@@ -192,7 +192,11 @@ export class Portal {
         if (typeof creature === "string") creature = await fromUuid(creature);
         if (!creature) creature = game.actors.getName(originalCreature);
         if (!creature) return null;
-        if (creature instanceof Actor) return await creature.getTokenDocument();
+        if (creature instanceof Actor) {
+            const tokenDocument = await creature.getTokenDocument();
+            if (!tokenDocument.actor) tokenDocument.updateSource({ [`flags.${MODULE_ID}.importActor`]: creature.toObject() });
+            return tokenDocument;
+        }
         if (creature instanceof TokenDocument) return creature.toObject();
         if (creature instanceof Token) return creature.document.toObject();
         return null;
@@ -252,6 +256,12 @@ export class Portal {
         }
     }
 
+    async #processCompendiumImport(tokenDocument) {
+        if (!tokenDocument.flags[MODULE_ID]?.importActor) return;
+        const actor = game.actors.getName(tokenDocument.flags[MODULE_ID].importActor.name) ?? await Router.createActor(tokenDocument.flags[MODULE_ID].importActor);
+        tokenDocument.updateSource({ actorId: actor.id, flags: { [MODULE_ID]: { importActor: null } } });
+    }
+
     //final methods
 
     async pick(options = {}) {
@@ -289,7 +299,7 @@ export class Portal {
             position = { x: this.#template.x, y: this.#template.y, elevation: this.#template.elevation ?? 0 };
         }
 
-        if(this.#delay) await Portal.sleep(this.#delay);
+        if (this.#delay) await Portal.sleep(this.#delay);
 
         const spawned = [];
 
@@ -297,6 +307,7 @@ export class Portal {
             const roll = new Roll(this.#counts[ti].toString());
             const count = (await roll.evaluate()).total;
             const tokenDocument = this.#tokens[ti];
+            await this.#processCompendiumImport(tokenDocument);
             const offsetPosition = { x: position.x - (tokenDocument.width / 2) * canvas.scene.dimensions.size, y: position.y - (tokenDocument.height / 2) * canvas.scene.dimensions.size, elevation: position.elevation };
             for (let i = 0; i < count; i++) {
                 const tPos = Propagator.getFreePosition(tokenDocument, offsetPosition, true);
@@ -317,7 +328,7 @@ export class Portal {
         let selectedLi = [];
         const result = await foundry.applications.api.DialogV2.prompt({
             window: { title: options.title },
-            position: {width: 400},
+            position: { width: 400 },
             content: html,
             close: () => {
                 return false;
@@ -371,7 +382,7 @@ export class Portal {
         }
         await this.#preValidateAndProcessData();
         let position;
-        const picked = this.#template ?? await this.pick({});
+        const picked = this.#template ?? (await this.pick({}));
         if (!picked) return false;
         const gridAligned = canvas.grid.getTopLeftPoint(picked);
         position = gridAligned;
@@ -447,6 +458,8 @@ export class Portal {
 
         if (this.#tokens.length > 1) await this.dialog({ spawn: false, multipleChoice: false, title: `${MODULE_ID}.DIALOG.TransformTitle`, transform: true });
 
+        await this.#processCompendiumImport(this.#tokens[0]);
+
         const transformActor = this.#tokens[0].actor;
 
         if (!transformActor) return ui.notifications.error(`${MODULE_ID}.ERR.InvalidTransformCreature`, { localize: true });
@@ -505,7 +518,7 @@ export class Portal {
         tokenDocument.actor.sheet.close();
         const toDelete = await fromUuid(revertData.createdActor);
         const autoDelete = getSetting("autoDelete");
-        const confirmDelete = autoDelete || await foundry.applications.api.DialogV2.confirm({ position: { width: 400 }, window: { title: game.i18n.localize(`${MODULE_ID}.DIALOG.DeleteTitle`) }, content: game.i18n.localize(`${MODULE_ID}.DIALOG.DeleteContent`) + "<hr>" + `<strong>${toDelete.name}</strong>` });
+        const confirmDelete = autoDelete || (await foundry.applications.api.DialogV2.confirm({ position: { width: 400 }, window: { title: game.i18n.localize(`${MODULE_ID}.DIALOG.DeleteTitle`) }, content: game.i18n.localize(`${MODULE_ID}.DIALOG.DeleteContent`) + "<hr>" + `<strong>${toDelete.name}</strong>` }));
         if (confirmDelete) await Router.deleteDocument(toDelete);
         const tokenData = revertData.tokenData;
         foundry.utils.setProperty(tokenData, "flags." + MODULE_ID + ".revertData", null);
