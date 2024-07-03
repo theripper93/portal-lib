@@ -462,9 +462,11 @@ export class Portal {
 
         const transformActor = this.#tokens[0].actor;
 
-        if (!transformActor) return ui.notifications.error(`${MODULE_ID}.ERR.InvalidTransformCreature`, { localize: true });
+        if (!transformActor && !this.#tokens[0].flags[MODULE_ID]?.importActor) return ui.notifications.error(`${MODULE_ID}.ERR.InvalidTransformCreature`, { localize: true });
 
-        const transformedActorData = transformActor.toObject();
+        const transformedActorData = this.#tokens[0].flags[MODULE_ID]?.importActor ?? transformActor.toObject();
+
+        if(this.#tokens[0].flags[MODULE_ID]?.importActor) this.#tokens[0].updateSource({ flags: { [MODULE_ID]: { importActor: null } } });
 
         foundry.utils.setProperty(transformedActorData, `ownership.${game.user.id}`, CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER);
 
