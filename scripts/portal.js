@@ -458,8 +458,6 @@ export class Portal {
 
         if (this.#tokens.length > 1) await this.dialog({ spawn: false, multipleChoice: false, title: `${MODULE_ID}.DIALOG.TransformTitle`, transform: true });
 
-        await this.#processCompendiumImport(this.#tokens[0]);
-
         const transformActor = this.#tokens[0].actor;
 
         if (!transformActor && !this.#tokens[0].flags[MODULE_ID]?.importActor) return ui.notifications.error(`${MODULE_ID}.ERR.InvalidTransformCreature`, { localize: true });
