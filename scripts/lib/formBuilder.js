@@ -419,6 +419,7 @@ export class FormHelper extends foundry.applications.api.HandlebarsApplicationMi
         },
         genericForm: {
             template: PARTIAL_KEY,
+            classes: ["standard-form"],
         },
         footer: {
             template: "templates/generic/form-footer.hbs",
