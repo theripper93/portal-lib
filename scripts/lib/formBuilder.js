@@ -548,7 +548,7 @@ const FIELD_INNER_HBS = `
     {{/if}}
         `
 
-const GENERIC_FORM_HBS = `<div>
+const GENERIC_FORM_HBS = `<div class="scrollable" style="max-height: 70vh;">
     {{#if info}}{{{info}}}{{/if}}
     {{#each tabs as |tab|}}
 
