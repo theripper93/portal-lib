@@ -409,7 +409,7 @@ export class Portal {
             },
         );
 
-        await Router.updateDocument(targetToken, { x: position.x, y: position.y, elevation: position.elevation }, { animate: false });
+        await Router.updateDocument(targetToken, { x: position.x, y: position.y, elevation: position.elevation !== 0 ? position.elevation : targetToken.elevation }, { animate: false });
 
         //fade in token
         await CanvasAnimation.animate(
@@ -448,11 +448,19 @@ export class Portal {
     }
 
     async transform(options = {}) {
+
         await this.#preValidateAndProcessData();
         const original = typeof this.#transformTarget === "string" ? await fromUuid(this.#transformTarget) : this.#transformTarget;
         if (!original) return ui.notifications.error(`${MODULE_ID}.ERR.InvalidTransformTarget`, { localize: true });
         const actor = original instanceof Actor ? original : original.actor;
-        if (!actor) return ui.notifications.error(`${MODULE_ID}.ERR.InvalidTransformTarget`, { localize: true });
+    
+        if (!actor) return ui.notifications.error(`${MODULE_ID}.ERR.InvalidTransformTarget`, {localize: true});
+
+        let originalToken = actor.token ?? actor.getActiveTokens()[0] ?? actor.prototypeToken;
+        originalToken = originalToken.document ?? originalToken;
+        // Check if it's already a transformed actor
+        const isTransformed = originalToken.getFlag(MODULE_ID, "revertData");
+        if (isTransformed) return Portal.revertTransformation(originalToken);
 
         if (this.#tokens.length === 0) return ui.notifications.error(`${MODULE_ID}.ERR.InvalidTransformCreature`, { localize: true });
 
@@ -472,13 +480,6 @@ export class Portal {
             const value = foundry.utils.getProperty(original, attribute);
             if (value) foundry.utils.setProperty(transformedActorData, attribute, value);
         }
-
-        let originalToken = actor.token ?? actor.getActiveTokens()[0] ?? actor.prototypeToken;
-        originalToken = originalToken.document ?? originalToken;
-
-        // Check if it's already a transformed actor
-        const isTransformed = originalToken.getFlag(MODULE_ID, "revertData");
-        if (isTransformed) return Portal.revertTransformation(originalToken);
 
         for (const attribute of this.#tokenAttributes) {
             const value = foundry.utils.getProperty(originalToken, attribute);
