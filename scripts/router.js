@@ -58,7 +58,7 @@ export class Router {
             const actor = res[0].response;
             return await fromUuid(actor);
         } else {
-            return await Actor.create(data);
+            return await Actor.implementation.create(data);
         }
     }
 

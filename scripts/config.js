@@ -25,7 +25,7 @@ export function initConfig() {
     }, {response: true, timeout: 5000, users: Socket.USERS.FIRSTGM});
     
     Socket.register("createActor", async ({data}) => {
-        const actor = await Actor.create(data);
+        const actor = await Actor.implementation.create(data);
         return actor.uuid;
     }, {response: true, timeout: 5000, users: Socket.USERS.FIRSTGM});
 
