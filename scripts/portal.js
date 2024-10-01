@@ -271,7 +271,6 @@ export class Portal {
 
         if (result) {
             if (this.#data.origin && this.#data.range) {
-                console.log(this.#data.origin, result);
                 const distance = canvas.grid.measurePath([result, this.#data.origin], {gridSpaces: true}).distance;
                 if (distance > this.#data.range) {
                     ui.notifications.error(`${MODULE_ID}.ERR.OutOfRange`, { localize: true });
