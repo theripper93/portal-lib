@@ -271,7 +271,8 @@ export class Portal {
 
         if (result) {
             if (this.#data.origin && this.#data.range) {
-                const distance = canvas.grid.measureDistance(this.#data.origin, { x: result.x, y: result.y });
+                console.log(this.#data.origin, result);
+                const distance = canvas.grid.measurePath([result, this.#data.origin], {gridSpaces: true}).distance;
                 if (distance > this.#data.range) {
                     ui.notifications.error(`${MODULE_ID}.ERR.OutOfRange`, { localize: true });
                     return this.pick(options);
@@ -460,7 +461,7 @@ export class Portal {
         originalToken = originalToken.document ?? originalToken;
         // Check if it's already a transformed actor
         const isTransformed = originalToken.getFlag(MODULE_ID, "revertData");
-        if (isTransformed) return Portal.revertTransformation(originalToken);
+        if (isTransformed) return Portal.revertTransformation(originalToken, options);
 
         if (this.#tokens.length === 0) return ui.notifications.error(`${MODULE_ID}.ERR.InvalidTransformCreature`, { localize: true });
 
@@ -502,21 +503,21 @@ export class Portal {
 
         //assign actor to new token
         const originalCanvasToken = actor.token ?? actor.getActiveTokens()[0];
-        if (originalCanvasToken) {
+        if (originalCanvasToken && !this.#tokenAttributes.includes("actorId")) {
             await Router.updateDocument(originalCanvasToken.document ?? originalCanvasToken, { ...transformedActorData.prototypeToken, actorId: transformedActor.id, flags: { [MODULE_ID]: { revertData } } });
         }
 
-        originalCanvasToken.actor.sheet.render(true, { ...currentSheetPosition });
+        if(!options?.skipSheetRender) originalCanvasToken.actor.sheet.render(true, { ...currentSheetPosition });
 
         return transformedActor;
     }
 
-    static async revertTransformation(token) {
+    static async revertTransformation(token, transformOptions) {
         const tokenDocument = token.document ?? token;
         const revertData = tokenDocument.getFlag(MODULE_ID, "revertData");
         if (!revertData) return;
         const currentSheetPosition = { top: tokenDocument.actor.sheet.position.top, left: tokenDocument.actor.sheet.position.left };
-        tokenDocument.actor.sheet.close();
+        if(!transformOptions?.skipSheetRender) tokenDocument.actor.sheet.close();
         const toDelete = await fromUuid(revertData.createdActor);
         const autoDelete = getSetting("autoDelete");
         const confirmDelete = autoDelete || (await foundry.applications.api.DialogV2.confirm({ position: { width: 400 }, window: { title: game.i18n.localize(`${MODULE_ID}.DIALOG.DeleteTitle`) }, content: game.i18n.localize(`${MODULE_ID}.DIALOG.DeleteContent`) + "<hr>" + `<strong>${toDelete.name}</strong>` }));
@@ -524,7 +525,7 @@ export class Portal {
         const tokenData = revertData.tokenData;
         foundry.utils.setProperty(tokenData, "flags." + MODULE_ID + ".revertData", null);
         await Router.updateDocument(tokenDocument, tokenData);
-        tokenDocument.actor.sheet.render(true, { ...currentSheetPosition });
+        if(!transformOptions?.skipSheetRender) tokenDocument.actor.sheet.render(true, { ...currentSheetPosition });
         ui.notifications.info(`${MODULE_ID}.INFO.RevertedTransformation`, { localize: true });
         return tokenDocument;
     }
