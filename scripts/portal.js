@@ -435,6 +435,15 @@ export class Portal {
         return await portal.spawn();
     }
 
+    static async transform(options = {}) {
+        const portal = new Portal();
+        if (!options.target) {
+            portal.origin(canvas.tokens.controlled[0]);
+        }
+        portal.addCreature(options);
+        return await portal.transform();
+    }
+
     // Transformation Logic
 
     addActorAttribute(attribute) {
@@ -503,7 +512,9 @@ export class Portal {
         //assign actor to new token
         const originalCanvasToken = actor.token ?? actor.getActiveTokens()[0];
         if (originalCanvasToken && !this.#tokenAttributes.includes("actorId")) {
-            await Router.updateDocument(originalCanvasToken.document ?? originalCanvasToken, { ...transformedActorData.prototypeToken, actorId: transformedActor.id, flags: { [MODULE_ID]: { revertData } } });
+            const currentTokenDocument = originalCanvasToken.document ?? originalCanvasToken;
+            const newTokenDocument = await transformedActor.getTokenDocument({ x: currentTokenDocument.x, y: currentTokenDocument.y, actorId: transformedActor.id, flags: { [MODULE_ID]: { revertData } } });
+            await Router.updateDocument(currentTokenDocument, newTokenDocument.toObject());
         }
 
         if(!options?.skipSheetRender) originalCanvasToken.actor.sheet.render(true, { ...currentSheetPosition });
