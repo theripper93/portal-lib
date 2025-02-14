@@ -249,10 +249,14 @@ export class Portal {
             const centerCoords = canvas.grid.getCenter(template3d.x, template3d.y);
             template3d.x = centerCoords[0];
             template3d.y = centerCoords[1];
-            return new MeasuredTemplateDocument(template3d);
+            const td = new MeasuredTemplateDocument(template3d);
+            td.undefinedElevation = false;
+            return td;
         } else {
-            const templatePreview = new TemplatePreview(templateDocument, { origin: this.#data.origin, range: this.#data.range });
-            return await templatePreview.drawPreview();
+            const templatePreview = new TemplatePreview(templateDocument, {origin: this.#data.origin, range: this.#data.range});
+            const td = await templatePreview.drawPreview();
+            td.undefinedElevation = true;
+            return td;
         }
     }
 
@@ -384,6 +388,7 @@ export class Portal {
         let position;
         const picked = this.#template ?? (await this.pick({}));
         if (!picked) return false;
+        const useSourceElevation = this.template?.undefinedElevation ?? false;
         const centerPoint = picked;
         position = centerPoint;
         //calc offset
@@ -409,7 +414,7 @@ export class Portal {
             },
         );
 
-        await Router.updateDocument(targetToken, { x: position.x, y: position.y, elevation: position.elevation !== 0 ? position.elevation : targetToken.elevation }, { animate: false });
+        await Router.updateDocument(targetToken, { x: position.x, y: position.y, elevation: useSourceElevation ? targetToken.elevation :position.elevation }, { animate: false });
 
         //fade in token
         await CanvasAnimation.animate(
@@ -427,6 +432,10 @@ export class Portal {
             },
         );
         return this;
+    }
+
+    static async teleport(token, range) {
+        return new Portal().teleport(token, range);
     }
 
     static async spawn(options = {}) {
