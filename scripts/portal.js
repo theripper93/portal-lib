@@ -396,9 +396,9 @@ export class Portal {
         position.x += offset.x;
         position.y += offset.y;
         //fade out token
-        position = canvas.grid.getTopLeftPoint(position);
-
         const placeable = targetToken.object;
+        position = placeable.getSnappedPosition(position, {mode: CONST.GRID_SNAPPING_MODES.TOP_LEFT_CORNER, resolution:2})
+        
         const originalAlpha = placeable.mesh.alpha;
         await CanvasAnimation.animate(
             [
