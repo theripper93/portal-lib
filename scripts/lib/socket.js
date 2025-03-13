@@ -117,7 +117,7 @@ export class Socket {
         } else if (users === this.USERS.FIRSTGM) {
             if(!game.users.activeGM) {
                 options.users = [];
-                ui.notifications.error(game.modules.get(MODULE_ID).title) + ": This operation requires a Game Master to be connected.";
+                ui.notifications.error(game.modules.get(MODULE_ID).title + ": This operation requires a Game Master to be connected.");
             }
             options.users = [game.users.activeGM.id];
         } else if (users === this.USERS.SELF) {
