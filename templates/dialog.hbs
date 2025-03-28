@@ -2,7 +2,7 @@
     {{#each dialogData as |creature index|}}
     <li data-index="{{index}}">
         <div class="portal-creature-title">
-            <img src="{{creature.token.texture.src}}" alt="">
+            <video src="{{creature.token.texture.src}}" autoplay loop muted playsinline poster="{{creature.token.texture.src}}"></video>
             <span>{{creature.token.name}}</span>
         </div>
         <input class="{{#if ../transform}}hidden{{/if}}" type="text" value="{{creature.count}}">
