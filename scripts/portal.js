@@ -542,6 +542,7 @@ export class Portal {
         const confirmDelete = autoDelete || (await foundry.applications.api.DialogV2.confirm({ position: { width: 400 }, window: { title: game.i18n.localize(`${MODULE_ID}.DIALOG.DeleteTitle`) }, content: game.i18n.localize(`${MODULE_ID}.DIALOG.DeleteContent`) + "<hr>" + `<strong>${toDelete.name}</strong>` }));
         if (confirmDelete) await Router.deleteDocument(toDelete);
         const tokenData = revertData.tokenData;
+        ["x", "y", "elevation"].forEach(k => delete tokenData[k]);
         foundry.utils.setProperty(tokenData, "flags." + MODULE_ID + ".revertData", null);
         await Router.updateDocument(tokenDocument, tokenData);
         if(!transformOptions?.skipSheetRender) tokenDocument.actor.sheet.render(true, { ...currentSheetPosition });
