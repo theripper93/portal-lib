@@ -1,13 +1,16 @@
 export class TemplatePreview {
-    constructor(template, {origin, range}) {
+    constructor(template, {origin, range, snappingMode}) {
         this.document = template;
         this.resolve = null;
         this.promise = new Promise((resolve) => (this.resolve = resolve));
         this.origin = origin;
         this.range = range;
         this.isEvenDistance = (this.document.distance / canvas.scene.dimensions.distance) % 2 === 0;
+        if (snappingMode !== undefined) this.#snappingMode = snappingMode;
         if (this.range) this.range = range * canvas.scene.dimensions.distancePixels;
     }
+
+    #snappingMode = CONST.GRID_SNAPPING_MODES.CORNER;
 
     activateListeners() {
         this._onMoveFn = this.#onMove.bind(this);
@@ -21,7 +24,7 @@ export class TemplatePreview {
         if (!this.isEvenDistance) {
             coords = canvas.grid.getCenterPoint(coords);
         } else {
-            coords = canvas.grid.getSnappedPoint(coords, {mode: CONST.GRID_SNAPPING_MODES.CORNER});
+            coords = canvas.grid.getSnappedPoint(coords, {mode: this.#snappingMode});
         }
         this.document.updateSource(coords);
         this.previewObject.x = coords.x;

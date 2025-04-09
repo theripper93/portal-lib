@@ -132,6 +132,15 @@ export class Portal {
         return this;
     }
 
+    snappingMode(mode) {
+        if(!Object.values(CONST.GRID_SNAPPING_MODES).includes(mode)){
+            ui.notifications.error(`${MODULE_ID}.ERR.InvalidSnappingMode`, { localize: true });
+        }else{
+            this.#data.snappingMode = mode;
+        }
+        return this;
+    }
+
     delay(ms) {
         this.#delay = ms;
         return this;
@@ -253,7 +262,7 @@ export class Portal {
             td.undefinedElevation = false;
             return td;
         } else {
-            const templatePreview = new TemplatePreview(templateDocument, {origin: this.#data.origin, range: this.#data.range});
+            const templatePreview = new TemplatePreview(templateDocument, {origin: this.#data.origin, range: this.#data.range, snappingMode: this.#data.snappingMode});
             const td = await templatePreview.drawPreview();
             td.undefinedElevation = true;
             return td;
