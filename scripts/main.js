@@ -24,3 +24,17 @@ Hooks.on("getActorSheetHeaderButtons", (app, buttons) => {
         }
     });
 });
+
+Hooks.on("getHeaderControlsActorSheetV2", (app, buttons) => {
+    const actor = app.document ?? app.actor;
+    const canRevert = actor.token?.flags[MODULE_ID]?.revertData;
+    if(!canRevert) return;
+    buttons.unshift({
+        label: "Revert Transformation",
+        action: "revert",
+        icon: "fas fa-undo",
+        onClick: () => {
+            Portal.revertTransformation(actor.token);
+        }
+    });
+});
