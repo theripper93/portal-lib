@@ -76,7 +76,7 @@ export class TemplatePreview {
         //circle.y += circle.height / 2;
         this.previewObject = previewObject;
         canvas.interface.grid.addChild(previewObject);
-        CanvasAnimation.animate(
+        foundry.canvas.animation.CanvasAnimation.animate(
             [
                 {
                     parent: previewObject,
@@ -112,7 +112,7 @@ export class TemplatePreview {
         previewObject.addChild(circle);
         this.previewRangeObject = previewObject;
         canvas.interface.grid.addChild(previewObject);
-        CanvasAnimation.animate(
+        foundry.canvas.animation.CanvasAnimation.animate(
             [
                 {
                     parent: previewObject,
@@ -133,7 +133,7 @@ export class TemplatePreview {
     async cleanup() {
         document.removeEventListener("mousemove", this._onMoveFn);
         document.removeEventListener("mouseup", this._onMouseUpFn);
-        CanvasAnimation.animate(
+        foundry.canvas.animation.CanvasAnimation.animate(
             [
                 {
                     parent: this.previewObject,
@@ -151,7 +151,7 @@ export class TemplatePreview {
         });
 
         if (this.previewRangeObject) {
-            CanvasAnimation.animate(
+            foundry.canvas.animation.CanvasAnimation.animate(
                 [
                     {
                         parent: this.previewRangeObject,

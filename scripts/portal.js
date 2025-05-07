@@ -94,7 +94,7 @@ export class Portal {
     }
 
     origin(origin) {
-        if (origin instanceof Token || origin instanceof TokenDocument) {
+        if (origin instanceof foundry.canvas.placeables.Token || origin instanceof TokenDocument) {
             this.#data.teleportTarget = origin.document ?? origin;
             this.#transformTarget = origin.document ?? origin;
         } else if (origin instanceof Actor) {
@@ -409,7 +409,7 @@ export class Portal {
         position = placeable.getSnappedPosition(position, {mode: CONST.GRID_SNAPPING_MODES.TOP_LEFT_CORNER, resolution:2})
         
         const originalAlpha = placeable.mesh.alpha;
-        await CanvasAnimation.animate(
+        await foundry.canvas.animation.CanvasAnimation.animate(
             [
                 {
                     parent: placeable.mesh,
@@ -426,7 +426,7 @@ export class Portal {
         await Router.updateDocument(targetToken, { x: position.x, y: position.y, elevation: useSourceElevation ? targetToken.elevation :position.elevation }, { animate: false });
 
         //fade in token
-        await CanvasAnimation.animate(
+        await foundry.canvas.animation.CanvasAnimation.animate(
             [
                 {
                     parent: placeable.mesh,
