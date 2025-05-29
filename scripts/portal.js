@@ -78,6 +78,13 @@ export class Portal {
             return this;
         }
 
+        if(creature.count){
+            count = creature.count;
+        }
+        if(creature.creature){
+            creature = creature.creature;
+        }
+
         let tokenData = null;
 
         if (creature instanceof Token) tokenData = creature.document.toObject();
