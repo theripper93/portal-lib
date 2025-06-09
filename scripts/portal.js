@@ -354,7 +354,7 @@ export class Portal {
                 return false;
             },
             render: function (e, html, c) {
-                const content = html;
+                const content = html.element;
                 content.querySelectorAll("li").forEach((li, index) => {
                     if (index === 0) {
                         selectedLi = [li];
