@@ -511,7 +511,7 @@ export class Portal {
         foundry.utils.setProperty(transformedActorData, `ownership.${game.user.id}`, CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER);
 
         for (const attribute of this.#actorAttributes) {
-            const value = foundry.utils.getProperty(original, attribute);
+            const value = foundry.utils.getProperty(original.actor ?? {}, attribute);
             if (value) foundry.utils.setProperty(transformedActorData, attribute, value);
         }
 
